@@ -11,10 +11,19 @@ public class Test {
     public static void main(String[] args) throws Exception {
    			
     	String fileName = "prova.fool";
-
     	CharStream chars = CharStreams.fromFileName(fileName);
-    	FOOLLexer lexer = new FOOLLexer(chars);
+		/*
+		 * Il lexer data una sequenza di caratteri, li aggrega in token di opportune categorie
+		 * (nomi, parole chiave, simboli di punteggiatura, etc.) il primo scopo dell'analisi lessicale è dividere
+		 * il testo nelle unità lessicali: gruppi di caratteri chiamate lessemi.
+		 * */
+		FOOLLexer lexer = new FOOLLexer(chars);
     	CommonTokenStream tokens = new CommonTokenStream(lexer);
+		/*
+		* Un parser prende i dati di input i token e costruisce una struttura
+		* dati , albero di sintassi astratto ST,
+		* che fornisce una rappresentazione strutturale dell'input controllando la corretta sintassi.
+		* */
     	FOOLParser parser = new FOOLParser(tokens);
 
     	System.out.println("Generating ST via lexer and parser.");

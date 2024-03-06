@@ -1,4 +1,10 @@
 package svm;
+
+/**
+ * SVM is stack virtual machine that compile .FOOL file
+ *              compilazione               assembly
+ * quicksort.fool ----> quicksort.fool.asm ----> codice oggetto ----> V Stack virtual machine
+ */
 public class ExecuteVM {
     
     public static final int CODESIZE = 10000;
