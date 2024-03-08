@@ -6,6 +6,16 @@ import compiler.exc.*;
 import compiler.lib.*;
 
 public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
+	/*
+	SymbolTableASTVisitor ha lo scopo di associare usi a dichiarazioni tramite la symble table
+	-dando errori in caso di multiple dichiarazioni e identificatori non dichiarati
+
+	-attaccando alla foglia dell'AST che rappresenta l'uso di un identificatore x la
+	symbol table entry (NOI LA CHIAMIAMO STEntry !!), che contiene le informazioni
+	 prese dalla dichiarazione di x.
+
+	La visita dell'AST si trasforma in un EAST (enriched AST).
+	* */
 	
 	private List<Map<String, STentry>> symTable = new ArrayList<>();
 	private int nestingLevel=0; // current nesting level

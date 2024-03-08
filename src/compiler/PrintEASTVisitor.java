@@ -5,7 +5,16 @@ import compiler.lib.*;
 import compiler.exc.*;
 
 public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
-
+	/*
+	* Facciamo un semplice visita del EAST generato in modo da visualizzarlo
+	* stampando in modo indentato, oltre ai suoi nodi (di classe che eredita
+	* da Node), anche la sue STentry.
+	*
+	* Funziona grazie a un visitor che consente di visitare sia Node che Stentry
+	* tramite una interfaccia Visitable (contiene il metodo accept), implementata da
+	* entrambi.
+	*
+	* */
 	PrintEASTVisitor() { super(false,true); } 
 
 	@Override
