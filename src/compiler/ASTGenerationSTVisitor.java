@@ -58,26 +58,68 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 
 	@Override
 	public Node visitTimesDiv(TimesDivContext c) {
+		Node n;
 		if (print) printVarAndProdName(c);
-		Node n = new TimesNode(visit(c.exp(0)), visit(c.exp(1)));
-		n.setLine(c.TIMES().getSymbol().getLine());		// setLine added
+		if(c.TIMES()!=null) {
+			n = new TimesNode(visit(c.exp(0)), visit(c.exp(1)));
+			n.setLine(c.TIMES().getSymbol().getLine());// setLine added
+		}else {
+			n = new DivNode(visit(c.exp(0)), visit(c.exp(1)));
+			n.setLine(c.DIV().getSymbol().getLine());
+		}
         return n;
 	}
 
 	@Override
 	public Node visitPlusMinus(PlusMinusContext c) {
+		Node n;
 		if (print) printVarAndProdName(c);
-		Node n = new PlusNode(visit(c.exp(0)), visit(c.exp(1)));
-		n.setLine(c.PLUS().getSymbol().getLine());	
+		if(c.PLUS()!=null) {
+			 n = new PlusNode(visit(c.exp(0)), visit(c.exp(1)));
+			n.setLine(c.PLUS().getSymbol().getLine());
+		}else {
+			n = new MinusNode(visit(c.exp(0)),visit(c.exp(1)));
+			n.setLine((c.MINUS().getSymbol().getLine()));
+		}
         return n;		
 	}
 
 	@Override
 	public Node visitEqGreLse(EqGreLseContext c) {
+		Node n;
 		if (print) printVarAndProdName(c);
-		Node n = new EqualNode(visit(c.exp(0)), visit(c.exp(1)));
-		n.setLine(c.EQ().getSymbol().getLine());		
+		if(c.EQ()!=null) {
+			n = new EqualNode(visit(c.exp(0)), visit(c.exp(1)));
+			n.setLine(c.EQ().getSymbol().getLine());
+		}
+		else if(c.GRE()!=null){
+			n = new GreaterEqualsNode(visit(c.exp(0)),visit(c.exp(1)));
+			n.setLine(c.GRE().getSymbol().getLine());
+		}else {
+			n = new LessEqualsNode(visit(c.exp(0)),visit(c.exp(1)));
+			n.setLine(c.LSE().getSymbol().getLine());
+		}
         return n;		
+	}
+
+	public Node visitNotNode(NotContext c){
+		if (print) printVarAndProdName(c);
+		Node n = new NotNode(visit(c.exp()));
+		n.setLine(c.NOT().getSymbol().getLine());
+		return n;
+	}
+
+	public Node visitAndORNode(AndOrContext c){
+		Node n;
+		if (print) printVarAndProdName(c);
+		if(c.AND()!=null) {
+			n = new AndNode(visit(c.exp(0)), visit(c.exp(1)));
+			n.setLine(c.AND().getSymbol().getLine());
+		}else {
+			n = new OrNode(visit(c.exp(0)),visit(c.exp(1)));
+			n.setLine((c.OR().getSymbol().getLine()));
+		}
+		return n;
 	}
 
 	@Override
