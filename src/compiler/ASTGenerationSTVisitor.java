@@ -93,10 +93,10 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 			n.setLine(c.EQ().getSymbol().getLine());
 		}
 		else if(c.GRE()!=null){
-			n = new GreaterEqualsNode(visit(c.exp(0)),visit(c.exp(1)));
+			n = new GreaterEqualNode(visit(c.exp(0)),visit(c.exp(1)));
 			n.setLine(c.GRE().getSymbol().getLine());
 		}else {
-			n = new LessEqualsNode(visit(c.exp(0)),visit(c.exp(1)));
+			n = new LessEqualNode(visit(c.exp(0)),visit(c.exp(1)));
 			n.setLine(c.LSE().getSymbol().getLine());
 		}
         return n;		

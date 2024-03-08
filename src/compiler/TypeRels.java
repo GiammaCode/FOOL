@@ -10,4 +10,13 @@ public class TypeRels {
 		return a.getClass().equals(b.getClass()) || ((a instanceof BoolTypeNode) && (b instanceof IntTypeNode));
 	}
 
+	public static boolean isBoolean(TypeNode e) {
+		return e.getClass().equals(BoolTypeNode.class);
+	}
+
+	public static boolean isInteger(TypeNode e) {
+		return e.getClass().equals(IntTypeNode.class);
+	}
+
+
 }

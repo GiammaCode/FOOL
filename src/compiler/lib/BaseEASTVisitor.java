@@ -14,4 +14,5 @@ public class BaseEASTVisitor<S,E extends Exception> extends BaseASTVisitor<S,E> 
 	}
 	
 	public S visitSTentry(STentry s) throws E {throw new UnimplException();}
+
 }
