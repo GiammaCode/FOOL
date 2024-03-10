@@ -97,7 +97,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) printNode(n);
 		TypeNode l = visit(n.left);
 		TypeNode r = visit(n.right);
-		if ( !isInteger(l) && !isInteger(r))
+		if ( !(isInteger(l) && isInteger(r)))
 			throw new TypeException("Incompatible types in greater equal",n.getLine());
 		return new BoolTypeNode();
 	}
@@ -107,7 +107,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) printNode(n);
 		TypeNode l = visit(n.left);
 		TypeNode r = visit(n.right);
-		if ( !isInteger(l) && !isInteger(r) )
+		if ( !(isInteger(l) && isInteger(r)))
 			throw new TypeException("Incompatible types in less equal",n.getLine());
 		return new BoolTypeNode();
 	}
@@ -124,8 +124,9 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(DivNode n) throws TypeException {
 		if (print) printNode(n);
-		if ( !(isSubtype(visit(n.left), new IntTypeNode())
-				&& isSubtype(visit(n.right), new IntTypeNode())) )
+		TypeNode l = visit(n.left);
+		TypeNode r = visit(n.right);
+		if ( !(isInteger(l) && isInteger(r)))
 			throw new TypeException("Non integers in division",n.getLine());
 		return new IntTypeNode();
 	}
@@ -142,8 +143,9 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(MinusNode n) throws TypeException {
 		if (print) printNode(n);
-		if ( !(isSubtype(visit(n.left), new IntTypeNode())
-				&& isSubtype(visit(n.right), new IntTypeNode())) )
+		TypeNode l = visit(n.left);
+		TypeNode r = visit(n.right);
+		if ( !(isInteger(l) && isInteger(r)))
 			throw new TypeException("Non integers in subtract",n.getLine());
 		return new IntTypeNode();
 	}
@@ -153,7 +155,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) printNode(n);
 		TypeNode l = visit(n.left);
 		TypeNode r = visit(n.right);
-		if ( !isBoolean(l) && !isBoolean(r))
+		if ( !(isBoolean(l) && isBoolean(r)))
 			throw new TypeException("Incompatible types in and operation",n.getLine());
 		return new BoolTypeNode();
 	}
@@ -163,7 +165,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) printNode(n);
 		TypeNode l = visit(n.left);
 		TypeNode r = visit(n.right);
-		if ( !isBoolean(l) && !isBoolean(r))
+		if ( !(isBoolean(l) && isBoolean(r)))
 			throw new TypeException("Incompatible types in or operation",n.getLine());
 		return new BoolTypeNode();
 	}
