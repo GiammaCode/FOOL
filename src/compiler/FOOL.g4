@@ -1,9 +1,9 @@
 grammar FOOL;
- 
+
 @lexer::members {
 public int lexicalErrors=0;
 }
-   
+
 /*------------------------------------------------------------------
  * PARSER RULES
  *------------------------------------------------------------------*/
@@ -12,7 +12,7 @@ public int lexicalErrors=0;
     Partendo dall'inizio si ha un programma prog che è definito da un
     body cioè il progbody.
 */
-prog  : progbody EOF ;
+prog : progbody EOF ;
 
 /*
     il progbody ha sempre almeno una dichiarazione dec (+ significa
@@ -21,9 +21,20 @@ prog  : progbody EOF ;
 
     exp SEMIC è il vecchio caso senza dichiarazioni.
 */
-progbody : LET dec+ IN exp SEMIC  #letInProg
-         | exp SEMIC              #noDecProg
+progbody : LET ( cldec+ dec* | dec+ ) IN exp SEMIC #letInProg
+         | exp SEMIC                               #noDecProg
          ;
+
+cldec  : CLASS ID (EXTENDS ID)?
+              LPAR (ID COLON type (COMMA ID COLON type)* )? RPAR
+              CLPAR
+                   methdec*
+              CRPAR ;
+
+methdec : FUN ID COLON type
+              LPAR (ID COLON type (COMMA ID COLON type)* )? RPAR
+                   (LET dec+ IN)? exp
+              SEMIC ;
 
 /* Questa è la dichiarazione DEC
     puo essere dichiarazione di variabile o di funzione.
@@ -49,9 +60,11 @@ progbody : LET dec+ IN exp SEMIC  #letInProg
     In poche parole dentro a "let" si mettono le dichiarazioni di variabili e
     funzioni, invece dentro a "in" ci va il main.
 */
-dec : VAR ID COLON type ASS exp SEMIC  #vardec
-    | FUN ID COLON type LPAR (ID COLON type (COMMA ID COLON type)* )? RPAR 
-        	(LET dec+ IN)? exp SEMIC   #fundec
+dec : VAR ID COLON type ASS exp SEMIC #vardec
+    | FUN ID COLON type
+          LPAR (ID COLON type (COMMA ID COLON type)* )? RPAR
+               (LET dec+ IN)? exp
+          SEMIC #fundec
     ;
 
 /*
@@ -65,39 +78,51 @@ dec : VAR ID COLON type ASS exp SEMIC  #vardec
    in futuro quando visito l'albero sintattico.
 */
 exp     : exp (TIMES | DIV) exp #timesDiv
-        | exp (PLUS | MINUS)  exp #plusMinus
-        | exp (EQ | GRE| LSE)  exp   #eqGreLse
+        | exp (PLUS | MINUS) exp #plusMinus
+        | exp (EQ | GE | LE) exp #comp
         | exp (AND | OR) exp #andOr
-        | NOT exp #not
+	    | NOT exp #not
         | LPAR exp RPAR #pars
     	| MINUS? NUM #integer
-	    | TRUE #true     
+	    | TRUE #true
 	    | FALSE #false
-	    | IF exp THEN CLPAR exp CRPAR ELSE CLPAR exp CRPAR  #if   
+	    | NULL #null
+	    | NEW ID LPAR (exp (COMMA exp)* )? RPAR #new
+	    | IF exp THEN CLPAR exp CRPAR ELSE CLPAR exp CRPAR #if
 	    | PRINT LPAR exp RPAR #print
-	    | ID #id
+        | ID #id
 	    | ID LPAR (exp (COMMA exp)* )? RPAR #call
-        ; 
-             
+	    | ID DOT ID LPAR (exp (COMMA exp)* )? RPAR #dotCall
+        ;
+
+
 type    : INT #intType
         | BOOL #boolType
- 	    ;  
- 	  		  
+ 	    | ID #idType
+ 	    ;
+
 /*------------------------------------------------------------------
  * LEXER RULES
  *------------------------------------------------------------------*/
 
 PLUS  	: '+' ;
-MINUS	: '-' ; 
+MINUS   : '-' ;
 TIMES   : '*' ;
+DIV 	: '/' ;
 LPAR	: '(' ;
 RPAR	: ')' ;
 CLPAR	: '{' ;
 CRPAR	: '}' ;
 SEMIC 	: ';' ;
-COLON   : ':' ; 
+COLON   : ':' ;
 COMMA	: ',' ;
-EQ	    : '==' ;	
+DOT	    : '.' ;
+OR	    : '||';
+AND	    : '&&';
+NOT	    : '!' ;
+GE	    : '>=' ;
+LE	    : '<=' ;
+EQ	    : '==' ;
 ASS	    : '=' ;
 TRUE	: 'true' ;
 FALSE	: 'false' ;
@@ -105,22 +130,17 @@ IF	    : 'if' ;
 THEN	: 'then';
 ELSE	: 'else' ;
 PRINT	: 'print' ;
-LET     : 'let' ;	
-IN      : 'in' ;	
+LET     : 'let' ;
+IN      : 'in' ;
 VAR     : 'var' ;
-FUN	    : 'fun' ;	  
+FUN	    : 'fun' ;
+CLASS	: 'class' ;
+EXTENDS : 'extends' ;
+NEW 	: 'new' ;
+NULL    : 'null' ;
 INT	    : 'int' ;
 BOOL	: 'bool' ;
-NUM     : '0' | ('1'..'9')('0'..'9')* ; 
-
-//token e relativi lessemi per progetto "<=", ">=", "||", "&&", "/", "-" , "!"
-GRE     : '>=' ;
-LSE     : '<=' ;
-OR      : '||' ;
-AND     : '&&' ;
-NOT     : '!'  ;
-DIV     : '/'  ;
-
+NUM     : '0' | ('1'..'9')('0'..'9')* ;
 
 /* ID è un token con la relativa l'espressione regolare con i lessemi
     che metcha, cioè una lettera maiuscola o minuscola seguita da una
@@ -132,7 +152,7 @@ ID  	: ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;
 WHITESP  : ( '\t' | ' ' | '\r' | '\n' )+    -> channel(HIDDEN) ;
 
 COMMENT : '/*' .*? '*/' -> channel(HIDDEN) ;
- 
-ERR   	 : . { System.out.println("Invalid char "+getText()+" at line "+getLine()); lexicalErrors++; } -> channel(HIDDEN); 
+
+ERR   	 : . { System.out.println("Invalid char: "+ getText() +" at line "+getLine()); lexicalErrors++; } -> channel(HIDDEN);
 
 
