@@ -140,15 +140,14 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 		return nlJoin(
 				visit(n.left),
 				visit(n.right),
-				"beq " + l1,
-				"bleq " +l2,
-				"b " + l1,
+				"sub",   //sottraggo i due operandi
+				"push -1",
+				"bleq " +l1,   //-1 è <= del risultato della sottrazione?
+				"push 1",      //no, il primo numero è >= del secondo restituisco true
+				"b " + l2,
 				l1+":",
-				"push 1",
-				"b " + l3,
-				l2+":",
-				"push 0",
-				l3+":"
+				"push 0",   //si,-1  è piu piccolo del risultato della sottrazioni restituisco false
+				l2 + ":"
 		);
 	}
 
