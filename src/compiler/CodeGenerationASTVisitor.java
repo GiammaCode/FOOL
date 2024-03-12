@@ -114,6 +114,44 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 	}
 
 	@Override
+	public String visitNode(LessEqualNode n) {
+		if (print) printNode(n);
+		String l1 = freshLabel();
+		String l2 = freshLabel();
+		return nlJoin(
+				visit(n.left),
+				visit(n.right),
+				"bleq "+l1,
+				"push 0",
+				"b "+l2,
+				l1+":",
+				"push 1",
+				l2+":"
+
+		);
+	}
+
+	@Override
+	public String visitNode(GreaterEqualNode n) {
+		if (print) printNode(n);
+		String l1 = freshLabel();
+		String l2 = freshLabel();
+		String l3 = freshLabel();
+		return nlJoin(
+				visit(n.left),
+				visit(n.right),
+				"sub",   //sottraggo i due operandi
+				"push -1",
+				"bleq " +l1,   //-1 è <= del risultato della sottrazione?
+				"push 1",      //no, il primo numero è >= del secondo restituisco true
+				"b " + l2,
+				l1+":",
+				"push 0",   //si,-1  è piu piccolo del risultato della sottrazioni restituisco false
+				l2 + ":"
+		);
+	}
+
+	@Override
 	public String visitNode(TimesNode n) {
 		if (print) printNode(n);
 		return nlJoin(
@@ -152,6 +190,17 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 				"sub"
 		);
 	}
+
+//	@Override
+//	public String visitNode(AndNode n) {
+//		if (print) printNode(n);
+//		return nlJoin(
+//				visit(n.left),
+//				visit(n.right),
+//
+//		);
+//	}
+
 	@Override
 	public String visitNode(CallNode n) {
 		if (print) printNode(n,n.id);
