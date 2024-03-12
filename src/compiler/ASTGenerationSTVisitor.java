@@ -112,7 +112,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 	public Node visitAndORNode(AndOrContext c){
 		Node n;
 		if (print) printVarAndProdName(c);
-		if(c.AND()!=null) {
+		if(c.AND()!= null) {
 			n = new AndNode(visit(c.exp(0)), visit(c.exp(1)));
 			n.setLine(c.AND().getSymbol().getLine());
 		}else {
