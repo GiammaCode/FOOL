@@ -18,12 +18,12 @@ add
 lw
 js
 push 1
-beq label4
+beq label5
 push 10
-b label5
-label4:
-push 0
+b label6
 label5:
+push 0
+label6:
 print
 halt
 
@@ -44,11 +44,14 @@ push 2
 add
 lw
 beq label2
-push 0
-b label3
+bleq label3
+b label2
 label2:
 push 1
+b label4
 label3:
+push 0
+label4:
 beq label0
 push 0
 b label1
