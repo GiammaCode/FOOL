@@ -1,12 +1,12 @@
-push 0
+push 1
 push 0
 add
-push 2
-beq label2
 push 0
+beq label2
+push 1
 b label3
 label2:
-push 1
+push 0
 label3:
 push 1
 beq label0

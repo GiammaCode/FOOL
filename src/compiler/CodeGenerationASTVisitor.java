@@ -175,6 +175,25 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     }
 
     @Override
+    public String visitNode(OrNode n) {
+        if (print) printNode(n);
+        String l1 = freshLabel();
+        String l2 = freshLabel();
+        return nlJoin(
+                visit(n.left),
+                visit(n.right),
+                "add",          //faccio la somma true=1, false=0 pusho il ris
+                "push 0",       //pusho 20 perchè vado a studiare l'unico caso false (false + false)
+                "beq " + l1,
+                "push 1",       //diverso da 1: pusho 1 true (ho avuto un true e un false oppure due true)
+                "b " + l2,
+                l1 + ":",
+                "push 0",       //uguale a 0: pusho 0 false
+                l2 + ":"
+        );
+    }
+
+    @Override
     public String visitNode(TimesNode n) {
         if (print) printNode(n);
         return nlJoin(

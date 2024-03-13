@@ -1,5 +1,5 @@
 print(
-    if(false && false)
+    if(true || false)
         then {true}
         else {false}
     )
