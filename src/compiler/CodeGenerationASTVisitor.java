@@ -196,17 +196,11 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     @Override
     public String visitNode(NotNode n) {
         if (print) printNode(n, n.exp.toString());
-        String l1 = freshLabel();
-        String l2 = freshLabel();
+        //pusho un 1, poi 1-exp se exp=0, ris=1 faccio il complemento
         return nlJoin(
+                "push 1",
                 visit(n.exp),
-                "push 0",       //pusho 0 cosi da confrontare se è uguale a 0
-                "beq " + l1,
-                "push 0",       //diverso da 1: pusho 0 false
-                "b " + l2,
-                l1 + ":",
-                "push 1",       //uguale a 0: pusho 1 true
-                l2 + ":"
+                "sub"
         );
     }
 
