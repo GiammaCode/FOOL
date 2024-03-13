@@ -85,31 +85,31 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitEqGreLse(EqGreLseContext c) {
+	public Node visitComp(CompContext c) {
 		Node n;
 		if (print) printVarAndProdName(c);
 		if(c.EQ()!=null) {
 			n = new EqualNode(visit(c.exp(0)), visit(c.exp(1)));
 			n.setLine(c.EQ().getSymbol().getLine());
 		}
-		else if(c.GRE()!=null){
+		else if(c.GE()!=null){
 			n = new GreaterEqualNode(visit(c.exp(0)),visit(c.exp(1)));
-			n.setLine(c.GRE().getSymbol().getLine());
+			n.setLine(c.GE().getSymbol().getLine());
 		}else {
 			n = new LessEqualNode(visit(c.exp(0)),visit(c.exp(1)));
-			n.setLine(c.LSE().getSymbol().getLine());
+			n.setLine(c.LE().getSymbol().getLine());
 		}
         return n;		
 	}
-
-	public Node visitNotNode(NotContext c){
+	@Override
+	public Node visitNot(NotContext c){
 		if (print) printVarAndProdName(c);
 		Node n = new NotNode(visit(c.exp()));
 		n.setLine(c.NOT().getSymbol().getLine());
 		return n;
 	}
-
-	public Node visitAndORNode(AndOrContext c){
+	@Override
+	public Node visitAndOr(AndOrContext c){
 		Node n;
 		if (print) printVarAndProdName(c);
 		if(c.AND()!= null) {
