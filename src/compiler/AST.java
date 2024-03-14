@@ -4,6 +4,10 @@ import java.lang.ref.SoftReference;
 import java.util.*;
 import compiler.lib.*;
 
+/*
+ *	accept()  accetta un qualunque baseASTVisitor dato che tutti gli ASTVisitor estendono il base
+ *
+ */
 public class AST {
 	
 	public static class ProgLetInNode extends Node {
@@ -13,7 +17,6 @@ public class AST {
 			declist = Collections.unmodifiableList(d); 
 			exp = e;
 		}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
@@ -152,8 +155,6 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-
-	
 	public static class PlusNode extends Node {
 		final Node left;
 		final Node right;
@@ -171,24 +172,26 @@ public class AST {
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//							OBJECT ORIENTED EXTENSION
-	/////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//nodo classe
 	public static class ClassNode extends DecNode {
 		final String id;
-		final List<FieldNode> fildList;
+		final List<FieldNode> fieldList;
 		final List<MethodNode> methodNode;
 		ClassNode(List<FieldNode> fieldList, List<MethodNode> methodList, String id) {
 			//la classe una volta dichiarata possiede quei metodi e campi e non è più modificabile
-			this.fildList=Collections.unmodifiableList(fieldList);
+			this.fieldList=Collections.unmodifiableList(fieldList);
 			this.methodNode=Collections.unmodifiableList(methodList);
 			this.id=id;
 		}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	//nodo dichirazione del campo di una classe
 	public static class FieldNode extends DecNode {
 		final String id;
 		final Node exp;
@@ -197,11 +200,11 @@ public class AST {
 			type=t;
 			this.exp=exp;
 		}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	//nodo dichiarazione di un metodo della classe
 	public static class MethodNode extends DecNode {
 		final String id;
 		final TypeNode retType;
@@ -215,16 +218,16 @@ public class AST {
 			this.declist=dl;
 			this.exp=e;
 		}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	//nodo chiamata di una classe, es: nameClass.setValue(x);
 	public static class ClassCallNode extends DecNode {
 		final RefTypeNode classID;
 		final List<Node> listNode;
 		final String methodID;
-		STentry stenty; //?????????????????
+		STentry stEntry; //??
 		STentry methodStentry;
 		int nestingLevel;
 		ClassCallNode (RefTypeNode classID, String methodID, List<Node> listNode) {
@@ -232,11 +235,11 @@ public class AST {
 			this.methodID=methodID;
 			this.listNode=listNode;
 		}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	//nodo relativo alla new ID
 	public static class NewNode extends DecNode {
 		final List<Node> argList;
 		final String id;
@@ -245,19 +248,27 @@ public class AST {
 			this.argList=argList;
 			this.id=id;
 		}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	//nodo del null, non implementato perchè null.
 	public static class EmptyNode extends DecNode {
-		//non implementato perchè null
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	/*
+	*	ClassTypeNode che ha come campi:
+	*		• ArrayList<TypeNode> allFields (tipi dei campi, inclusi quelli ereditati, in ordine di apparizione)
+	*		• ArrayList<ArrowTypeNode> allMethods (tipi funzionali metodi, inclusi ereditati, in ordine apparizione)
+	*/
 	public static class ClassTypeNode extends DecNode {
-		ClassTypeNode () {
+		final ArrayList<TypeNode> allFields;
+		final ArrayList<ArrowTypeNode> allMethods;
+		ClassTypeNode (ArrayList<TypeNode> allFields, ArrayList<ArrowTypeNode> allMethods) {
+			this.allFields = allFields;
+			this.allMethods = allMethods;
 		}
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
@@ -284,6 +295,10 @@ public class AST {
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//									FINE ESTENSIONE OBJECT ORIENTED
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static class CallNode extends Node {
 		final String id;
