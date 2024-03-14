@@ -171,18 +171,16 @@ public class AST {
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
-
-	//object oriented extension
-
-
+	/////////////////////////////////////////////////////////////////////////////////////
+	//							OBJECT ORIENTED EXTENSION
+	/////////////////////////////////////////////////////////////////////////////////////
 	public static class ClassNode extends DecNode {
 		final String id;
 		final List<FieldNode> fildList;
-
 		final List<MethodNode> methodNode;
-
 		ClassNode(List<FieldNode> fieldList, List<MethodNode> methodList, String id) {
-			this.fildList=Collections.unmodifiableList(fieldList);			//la classe una volta dichiarata possiede quei metodi e campi
+			//la classe una volta dichiarata possiede quei metodi e campi e non è più modificabile
+			this.fildList=Collections.unmodifiableList(fieldList);
 			this.methodNode=Collections.unmodifiableList(methodList);
 			this.id=id;
 		}
@@ -194,7 +192,6 @@ public class AST {
 	public static class FieldNode extends DecNode {
 		final String id;
 		final Node exp;
-
 		FieldNode (String id, Node exp, TypeNode t) {
 			this.id=id;
 			type=t;
@@ -219,11 +216,9 @@ public class AST {
 			this.exp=e;
 		}
 
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
-
 
 	public static class ClassCallNode extends DecNode {
 		final RefTypeNode classID;
@@ -250,13 +245,13 @@ public class AST {
 			this.argList=argList;
 			this.id=id;
 		}
+
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
 	public static class EmptyNode extends DecNode {
-		EmptyNode () {
-		}
+		//non implementato perchè null
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
@@ -276,7 +271,6 @@ public class AST {
 	}
 
 	public static class RefTypeNode extends DecNode {
-
 		final String id;
 		RefTypeNode (String id) {   //da rivedere
 			this.id=id;
@@ -286,15 +280,11 @@ public class AST {
 	}
 
 	public static class EmptyTypeNode extends DecNode {
-		EmptyTypeNode () {
-		}
+		//non implementato perchè null
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-
-
-	
 	public static class CallNode extends Node {
 		final String id;
 		final List<Node> arglist;
