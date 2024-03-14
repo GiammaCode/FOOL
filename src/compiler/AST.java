@@ -273,9 +273,14 @@ public class AST {
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
-
+	/*
+	*	MethodTypeNode ha come campo il tipo funzionale:
+	*			• final ArrowTypeNode fun
+	*/
 	public static class MethodTypeNode extends DecNode {
-		MethodTypeNode () {
+		final ArrowTypeNode fun;
+		MethodTypeNode (ArrowTypeNode fun) {
+			this.fun = fun;
 		}
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
