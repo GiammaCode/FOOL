@@ -209,6 +209,9 @@ public class AST {
 		final List<ParNode> parlist;
 		final List<DecNode> declist;
 		final Node exp;
+
+		public String label; //label creata per la CodeGeneration
+
 		MethodNode(String i, TypeNode rt, List<ParNode> pl, List<DecNode> dl, Node e) {
 			this.id=i;
 			this.retType=rt;

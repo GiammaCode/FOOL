@@ -288,4 +288,60 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         if (print) printNode(n, n.val.toString());
         return "push " + n.val;
     }
+
+    //Implementazione Object Oriented
+    @Override
+    public String visitNode(ClassNode n) {
+        return null;
+    }
+
+    //FieldNode come ParNode non utilizzato.
+    //public String visitNode(FieldNode n) {}
+
+    @Override
+    public String visitNode(MethodNode n) {
+        if (print) printNode(n, n.id);
+        String declCode = null, popDecl = null, popParl = null;
+        for (Node dec : n.declist) {
+            declCode = nlJoin(declCode, visit(dec));
+            popDecl = nlJoin(popDecl, "pop");
+        }
+        for (int i = 0; i < n.parlist.size(); i++) popParl = nlJoin(popParl, "pop");
+        n.label = freshFunLabel();
+        putCode(
+                nlJoin(
+                        n.label + ":",
+                        "cfp", // set $fp to $sp value
+                        "lra", // load $ra value
+                        declCode, // generate code for local declarations (they use the new $fp!!!)
+                        visit(n.exp), // generate code for function body expression
+                        "stm", // set $tm to popped value (function result)
+                        popDecl, // remove local declarations from stack
+                        "sra", // set $ra to popped value
+                        "pop", // remove Access Link from stack
+                        popParl, // remove parameters from stack
+                        "sfp", // set $fp to popped value (Control Link)
+                        "ltm", // load $tm value (function result)
+                        "lra", // load $ra value
+                        "js"  // jump to popped address
+                )
+        );
+        return null;
+    }
+
+    @Override
+    public String visitNode(ClassCallNode n) {
+        return null;
+    }
+
+    @Override
+    public String visitNode(EmptyNode n) {
+        if (print) printNode(n);
+        return "push -1 ";
+    }
+
+    @Override
+    public String visitNode(NewNode n) {
+        return null;
+    }
 }
