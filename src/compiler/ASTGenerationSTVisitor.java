@@ -223,4 +223,60 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		n.setLine(c.ID().getSymbol().getLine());
 		return n;
 	}
+
+	// OO implementation
+	@Override
+	public Node visitNew(NewContext c ) {
+		if (print) printVarAndProdName(c);
+		List<Node> arglist = new ArrayList<>();
+		//popolo la lista di argomenti per passarla al newNode
+		for(ExpContext arg: c.exp()) arglist.add(visit(arg));
+		Node n= new NewNode(arglist,c.ID().getText());
+		n.setLine(c.ID().getSymbol().getLine());
+		return n;
+	}
+
+	public Node visitNull(NullContext c ) {
+		if (print) printVarAndProdName(c);
+		//restituisco un emptyNode
+		return new EmptyNode();
+	}
+
+	public Node visitDotCall(DotCallContext c ) {
+		if (print) printVarAndProdName(c);
+		List<Node> listNode = new ArrayList<>();
+		//popolo la list degli argomenti della chimata di funzione
+		for (ExpContext exp : c.exp()) listNode.add(visit(exp));
+		//l'id della classe è di tipo refTypeNode
+		Node n = new ClassCallNode(new RefTypeNode(c.ID(0).getText()),c.getText(),listNode);
+		n.setLine(c.ID(0).getSymbol().getLine());
+		return n;
+	}
+
+	public Node visitCldec(CldecContext c){
+		if (print) printVarAndProdName(c);
+		List<FieldNode> fieldList = new ArrayList<>();
+		//popolo la list dei field
+		for (int i = 1; i < c.ID().size(); i++) {
+			// "-1" è l'offset tra l'1 del for e lo zero dell'index del context
+			FieldNode f = new FieldNode(c.ID(i).getText(),(TypeNode) visit(c.type(i-1)));
+			f.setLine(c.ID(i).getSymbol().getLine());
+			fieldList.add(f);
+		}
+		List<MethodNode> methodList = new ArrayList<>();
+		//popolo la lista dei methods
+		for (MethdecContext mdec : c.methdec()) methodList.add((MethodNode) visit(mdec));
+		Node n = null;
+		//se non c'è il nome della classe non torno nodo nullo
+		if (c.ID().size()>0) {
+			n = new ClassNode(fieldList,methodList, c.ID(0).getText());
+			n.setLine(c.CLASS().getSymbol().getLine());
+		}
+		return n;
+	}
+
+
+
+
+
 }

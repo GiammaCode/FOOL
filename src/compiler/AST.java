@@ -191,11 +191,9 @@ public class AST {
 
 	public static class FieldNode extends DecNode {
 		final String id;
-		final Node exp;
-		FieldNode (String id, Node exp, TypeNode t) {
+		FieldNode (String id, TypeNode t) {
 			this.id=id;
 			type=t;
-			this.exp=exp;
 		}
 
 		@Override
@@ -251,7 +249,7 @@ public class AST {
 	}
 
 	public static class EmptyNode extends DecNode {
-		//non implementato perchè null
+		//non implementato per chè null
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
@@ -290,9 +288,9 @@ public class AST {
 		final List<Node> arglist;
 		STentry entry;
 		int nl;
-		CallNode(String i, List<Node> p) {
-			id = i; 
-			arglist = Collections.unmodifiableList(p);
+		CallNode(String id, List<Node> p) {
+			this.id = id;
+			this.arglist = Collections.unmodifiableList(p);
 		}
 
 		@Override
@@ -303,7 +301,7 @@ public class AST {
 		final String id;
 		STentry entry;
 		int nl;
-		IdNode(String i) {id = i;}
+		IdNode(String id) {this.id = id;}
 
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
