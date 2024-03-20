@@ -1,6 +1,5 @@
 package compiler;
 
-import java.lang.ref.SoftReference;
 import java.util.*;
 import compiler.lib.*;
 
@@ -180,11 +179,11 @@ public class AST {
 	public static class ClassNode extends DecNode {
 		final String id;
 		final List<FieldNode> fieldList;
-		final List<MethodNode> methodNode;
+		final List<MethodNode> methodList;
 		ClassNode(List<FieldNode> fieldList, List<MethodNode> methodList, String id) {
 			//la classe una volta dichiarata possiede quei metodi e campi e non è più modificabile
 			this.fieldList=Collections.unmodifiableList(fieldList);
-			this.methodNode=Collections.unmodifiableList(methodList);
+			this.methodList =Collections.unmodifiableList(methodList);
 			this.id=id;
 		}
 		@Override
@@ -209,6 +208,9 @@ public class AST {
 		final List<ParNode> parlist;
 		final List<DecNode> declist;
 		final Node exp;
+
+		public String label; //label creata per la CodeGeneration
+
 		MethodNode(String i, TypeNode rt, List<ParNode> pl, List<DecNode> dl, Node e) {
 			this.id=i;
 			this.retType=rt;

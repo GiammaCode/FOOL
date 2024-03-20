@@ -116,10 +116,10 @@ CRPAR	: '}' ;
 SEMIC 	: ';' ;
 COLON   : ':' ;
 COMMA	: ',' ;
-DOT	    : '.' ;
-OR	    : '||'; //
-AND	    : '&&'; //
-NOT	    : '!' ; //
+DOT	    : '.' ;     //
+OR	    : '||'; // ok
+AND	    : '&&'; // ok
+NOT	    : '!' ; // ok
 GE	    : '>=' ; // ok
 LE	    : '<=' ; // ok
 EQ	    : '==' ;
@@ -134,10 +134,10 @@ LET     : 'let' ;
 IN      : 'in' ;
 VAR     : 'var' ;
 FUN	    : 'fun' ;
-CLASS	: 'class' ;
-EXTENDS : 'extends' ;
-NEW 	: 'new' ;
-NULL    : 'null' ;
+CLASS	: 'class' ;     //
+EXTENDS : 'extends' ;   //
+NEW 	: 'new' ;       //
+NULL    : 'null' ;      //
 INT	    : 'int' ;
 BOOL	: 'bool' ;
 NUM     : '0' | ('1'..'9')('0'..'9')* ;
