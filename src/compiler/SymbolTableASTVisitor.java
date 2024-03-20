@@ -350,7 +350,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			allFields.add(fieldNode.getType());
 		}
 		//n.methodNode = alla list dei metodi
-		for(MethodNode methodNode : n.methodNode){
+		for(MethodNode methodNode : n.methodList){
 			List<TypeNode> paramMethodTypes = new ArrayList<>();
 			for(ParNode parNode : methodNode.parlist){
 				paramMethodTypes.add(parNode.getType());
