@@ -1,12 +1,17 @@
 package compiler;
 
+import java.lang.reflect.Array;
 import java.util.*;
+
+import com.sun.jdi.ClassType;
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
 
-public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
-	/*
+/*
+	La Symbletable è una struttura dati, implementazione come  lista di hash Table
+	ArrayList di HasMap,
+
 	SymbolTableASTVisitor ha lo scopo di associare usi a dichiarazioni tramite la symble table
 	-dando errori in caso di multiple dichiarazioni e identificatori non dichiarati
 
@@ -16,11 +21,31 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 	La visita dell'AST si trasforma in un EAST (enriched AST).
 	* */
-	
+public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
+
+	/*symTable è una lista di mappe,
+	ogni mappa cosè? è mappa nomi id a palline (info st entry),
+	la nostra "pallina" inizia con il nesting level in cui è stata creata
+	la dichiarazione.
+
+	L'idea di base è che questa lista è organizzata per scope, noi useremo
+	gli indici in cui l'ambiente globale se ne sta a nesting level 0.
+	Nella pos=0 ci sta l'ambiente globale, quindi la mappa nella posizione iniziale
+	della lista è quella globale, invece la mappa che sta al fronte della lista
+	è quella con indice "nesting level" corrente.
+	* */
 	private List<Map<String, STentry>> symTable = new ArrayList<>();
-	private int nestingLevel=0; // current nesting level
+	private int nestingLevel=0; // Nesting level corrente
 	private int decOffset=-2; // counter for offset of local declarations at current nesting level 
-	int stErrors=0;
+	int stErrors=0; //tiene il conto degli errori totali
+
+	/*aggiunta della Class Table, a cosa serve?
+	Mappa ogni nome di classe nella propria Virtual ,
+	serve per preservare le dichiarazioni interne ad una
+	classe (campi e metodi) una volta che il visitor ha
+	concluso la dichiarazione di una classe.
+	* */
+	private Map< String, Map<String,STentry> > classTable = new HashMap<>();
 
 	SymbolTableASTVisitor() {}
 	SymbolTableASTVisitor(boolean debug) {super(debug);} // enables print for debugging
@@ -33,6 +58,24 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		return entry;
 	}
 
+	/*Le visite perchè tornano void?
+	L'obbiettivo della visita non è tornare qualcosa ma arricchire l'albero
+	e darà degli errori nei casi precedenti (sopra),
+	Quando non faccio nulla è lo stesso codice della print praticaamente.
+
+	Se sono nella radice (corpo principale programma) ProgLeInNode cosa faccio?
+	Devo creare la tabella per l'ambiente globale, HasMap, l'idea è che li
+	ci metto le dichiarazioni dell'ambiente globale, questa hm la metto nella
+	symbleTable.
+	Successivamente faccio la visita delle dichiarazioni e poi visito
+	l'exp che a sua volta visitera dichirazioni ecc.
+
+	L'idea è che la lista di hashMap cresce quando entro negli scope e
+	decresce quando esco dagli scope, rimuovo il fronte.
+	Finito tutto il programma posso rimuovere tutte le tabelle, perchè
+	SymTable serve solo per fare questo lavoro di check e arricchimento delle
+	informazioni.
+	* */
 	@Override
 	public Void visitNode(ProgLetInNode n) {
 		if (print) printNode(n);
@@ -230,6 +273,106 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(IntNode n) {
 		if (print) printNode(n, n.val.toString());
+		return null;
+	}
+
+	// Implementazione Object Oriented
+
+	/*
+
+	All'uscita della dichirazione della classe rimuovo il livello corrente
+	della SymTable
+
+	COME FACCIO AD AGGIORNARE LA VIRTUAL TABLE una volta entrato nella dichiarazione
+	della classe?
+	Come fatto a lezione, a parte che (metodo brutto ma funzionante)
+
+	1) se trovo nome campo o metodo gia presente non lo considero come errore
+	ma come overriding, sostituisco con la nuova stEnty ma con il vecchio
+	offset.
+	Devo sostituire nella stessa posizione praticamente.
+	Non devo consentire però l'overriding Field --> Method e viceversa.
+
+	2) se campo o metodo rimane invariato, uso contatore offset e decremento
+	e incremento.
+
+	COME FACCIO AD AGGIORNARE CLASS TYPE NODE ?
+	viene fatto nel codice della visita di classNode e
+	- per i campu aggionrno array allFields settando -offset-1 al tipo
+	converto l'offset in una posizione.
+	- per i metodi aggiorno allMethod settando offset (il primo è 0)
+	* */
+	@Override
+	public Void visitNode(ClassNode n) {
+		if (print) printNode(n);
+		/*Nella SIMBTABLE di livello 0 viene aggiunto il nome della classe
+		mappato ad una nuova STentry, cosa mettiamo nella StEntry?
+		Offset = -2 e incrementato, il tipo , nl=0
+		Se non eredito il tipo è un nuovo oggetto ClassTypeNode con lista vuota
+		(Field e metodi liste).
+		La gestisco come in VarNode, il type non c'è l'ho e lo creo
+		*/
+		Map<String, STentry> hashmap = symTable.get(nestingLevel);
+		ArrayList<TypeNode> allFields = new ArrayList<>();
+		ArrayList<ArrowTypeNode> allMethods = new ArrayList<>();
+		ClassTypeNode typeNode = new ClassTypeNode(allFields, allMethods);
+		STentry entry = new STentry(nestingLevel, typeNode.getType(),decOffset--);
+		/*
+		Nella CLASS TABLE, invece viene aggiunto il nome della classe associato
+		ad una nuova VIRTUAL TABLE, che funziona come prima (SymTable).
+		Se non eredito la creo vuota.
+		* */
+		Map<String, STentry> virtualTable = new HashMap<>();
+		classTable.put(n.id, virtualTable);
+		if (hashmap.put(n.id, entry) != null){
+			System.out.println("Par id " + n.id + " at line "+ n.getLine() +" already declared");
+			stErrors++;
+		}
+		/*
+		Mentre netriamo nella dichiarazione della classe, creo un nuovo livello
+		per la symTable ma non vuoto, GLI METTO LA VIRTUAL TABLE di prima.
+		* */
+		nestingLevel++;
+		symTable.add(hashmap);
+		//mi preparo per entrare in un nuovo scope.
+		int previosNl = decOffset;
+		decOffset = -2;
+		int fieldOffset = 1;
+		/*Una volta entrato nella dichiarazione della classe:
+		aggiorno Virtual Table e Class Type Node tutte le volte che si
+		incontrano.
+		--> dichiarazione di campo (NO visit FieldNode)
+		--> dichiarazione di metodo (visit MethodNode)
+		n.MethodNode è la methodList
+		* */
+		for(FieldNode fieldNode : n.fieldList){
+
+		}
+		for(MethodNode methodNode : n.methodNode){
+
+		}
+
+		return null;
+	}
+
+	// STentry della classe ID in campo "entry"
+	// ID deve essere in Class Table e STentry presa
+	// direttamente da livello 0 della Symbol Tabl
+	@Override
+	public Void visitNode(NewNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(EmptyNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(ClassCallNode n) {
+		if (print) printNode(n);
 		return null;
 	}
 
