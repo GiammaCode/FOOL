@@ -5,8 +5,10 @@ import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
 
-public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
-	/*
+/*
+	La Symbletable è una struttura dati, implementazione come  lista di hash Table
+	ArrayList di HasMap,
+
 	SymbolTableASTVisitor ha lo scopo di associare usi a dichiarazioni tramite la symble table
 	-dando errori in caso di multiple dichiarazioni e identificatori non dichiarati
 
@@ -16,11 +18,23 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 	La visita dell'AST si trasforma in un EAST (enriched AST).
 	* */
-	
+public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
+
+	/*symTable è una lista di mappe,
+	ogni mappa cosè? è mappa nomi id a palline (info st entry),
+	la nostra "pallina" inizia con il nesting level in cui è stata creata
+	la dichiarazione.
+
+	L'idea di base è che questa lista è organizzata per scope, noi useremo
+	gli indici in cui l'ambiente globale se ne sta a nesting level 0.
+	Nella pos=0 ci sta l'ambiente globale, quindi la mappa nella posizione iniziale
+	della lista è quella globale, invece la mappa che sta al fronte della lista
+	è quella con indice "nesting level" corrente.
+	* */
 	private List<Map<String, STentry>> symTable = new ArrayList<>();
-	private int nestingLevel=0; // current nesting level
+	private int nestingLevel=0; // Nesting level corrente
 	private int decOffset=-2; // counter for offset of local declarations at current nesting level 
-	int stErrors=0;
+	int stErrors=0; //tiene il conto degli errori totali
 
 	SymbolTableASTVisitor() {}
 	SymbolTableASTVisitor(boolean debug) {super(debug);} // enables print for debugging
@@ -33,6 +47,24 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		return entry;
 	}
 
+	/*Le visite perchè tornano void?
+	L'obbiettivo della visita non è tornare qualcosa ma arricchire l'albero
+	e darà degli errori nei casi precedenti (sopra),
+	Quando non faccio nulla è lo stesso codice della print praticaamente.
+
+	Se sono nella radice (corpo principale programma) ProgLeInNode cosa faccio?
+	Devo creare la tabella per l'ambiente globale, HasMap, l'idea è che li
+	ci metto le dichiarazioni dell'ambiente globale, questa hm la metto nella
+	symbleTable.
+	Successivamente faccio la visita delle dichiarazioni e poi visito
+	l'exp che a sua volta visitera dichirazioni ecc.
+
+	L'idea è che la lista di hashMap cresce quando entro negli scope e
+	decresce quando esco dagli scope, rimuovo il fronte.
+	Finito tutto il programma posso rimuovere tutte le tabelle, perchè
+	SymTable serve solo per fare questo lavoro di check e arricchimento delle
+	informazioni.
+	* */
 	@Override
 	public Void visitNode(ProgLetInNode n) {
 		if (print) printNode(n);
