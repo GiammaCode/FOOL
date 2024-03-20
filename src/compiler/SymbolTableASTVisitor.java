@@ -36,6 +36,14 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	private int decOffset=-2; // counter for offset of local declarations at current nesting level 
 	int stErrors=0; //tiene il conto degli errori totali
 
+	/*aggiunta della Class Table, a cosa serve?
+	Mappa ogni nome di classe nella propria Virtual ,
+	serve per preservare le dichiarazioni interne ad una
+	classe (campi e metodi) una volta che il visitor ha
+	concluso la dichiarazione di una classe.
+	* */
+	private Map< String, Map<String,STentry> > classTable = new HashMap<>();
+
 	SymbolTableASTVisitor() {}
 	SymbolTableASTVisitor(boolean debug) {super(debug);} // enables print for debugging
 
@@ -262,6 +270,31 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(IntNode n) {
 		if (print) printNode(n, n.val.toString());
+		return null;
+	}
+
+	// Implementazione Object Oriented
+
+	@Override
+	public Void visitNode(ClassNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+	@Override
+	public Void visitNode(NewNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(EmptyNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(ClassCallNode n) {
+		if (print) printNode(n);
 		return null;
 	}
 
