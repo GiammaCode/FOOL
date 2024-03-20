@@ -296,21 +296,40 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     @Override
     public String visitNode(ClassNode n) {
         if(print) printNode(n);
-        List<String> dispachTaples = new ArrayList<>();  //arraylist?
-
+        List<String> dispachTaple = new ArrayList<>();  //arraylist?
+        //visito tutti i methodNode della classe
         for (MethodNode method : n.methodList){
             visit(method);
-            int offset = method.
-            dispachTaples.add();
+            //Inserisco le label dei metodi dentro la dispachTale, l'offeset inserendoli così è corretto
+            dispachTaple.add(method.label);
         }
+        String heapLabel= null;
+        for(String label: dispachTaple){
+            // Per ogni label, salviamo l'indirizzo della label nell'heap successivamente incrementiamo hp.
+            heapLabel = nlJoin(heapLabel,
+                    "push " + label, // pusho sullo stack l'indirizzo (la label) dell'etichetta
+                    "lhp", // pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "sw", // store word: poppo i due valori dalla cima dello stack. Metto il secondo all'indirizzo puntato dal primo
+                    "lhp", //  pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "push 1", // aggiungo 1
+                    "add", // li sommo assieme
+                    "shp"); // poppo il valore di hp aumentato e lo inserisco nuovamente nel registro hp
+        }
+        return nlJoin(
+                "lhp",  // Pusho sullo stack il valore di hp prima di incrementarlo. Questo sarà il punto di inizio
+                heapLabel //  Scorro tutta la dispachTable e per ciascuna etichetta la memorizzo a indirizzo hp per poi incrementarlo
 
-
-        return null;
+        );
     }
+
+
 
     //FieldNode come ParNode non utilizzato.
     //public String visitNode(FieldNode n) {}
 
+
+
+    //simile a funNode ma con il campo label
     @Override
     public String visitNode(MethodNode n) {
         if (print) printNode(n, n.id);
@@ -344,7 +363,25 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
     @Override
     public String visitNode(ClassCallNode n) {
-        return null;
+        if (print) printNode(n);
+        String argCode = null, getAR = null;
+        for (int i = n.listNode.size() - 1; i >= 0; i--) argCode = nlJoin(argCode, visit(n.listNode.get(i)));
+        for (int i = 0; i < n.nestingLevel - n.stEntry.nl; i++) getAR = nlJoin(getAR, "lw");
+        return nlJoin(
+                "lfp", //carico il Control Link, puntatore che punta alla funzione chimante
+                argCode, // generate code for argument expressions in reversed order
+                "lfp", getAR,// retrieve address of frame containing "id" declaration
+                "push "+n.stEntry.offset, "add",
+                "lw",
+                // by following the static chain (of Access Links)
+                "stm", // set $tm to popped value (with the aim of duplicating top of stack)
+                "ltm", // load Access Link (pointer to frame of function "id" declaration)
+                "ltm", // duplicate top of stack
+                "lw",
+                "push " + n.stEntry.offset, "add", // compute address of "id" declaration
+                "lw", // load address of "id" function
+                "js"  // jump to popped address (saving address of subsequent instruction in $ra)
+        );
     }
 
     @Override
