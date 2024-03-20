@@ -225,7 +225,7 @@ public class AST {
 		final RefTypeNode classID;
 		final List<Node> listNode;
 		final String methodID;
-		STentry stEntry; //??
+		STentry stEntry;
 		STentry methodStentry;
 		int nestingLevel;
 		ClassCallNode (RefTypeNode classID, String methodID, List<Node> listNode) {

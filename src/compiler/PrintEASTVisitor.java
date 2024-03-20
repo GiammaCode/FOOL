@@ -257,7 +257,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 		return null;
 	}
 
-	@Overridegit
+	@Override
 	public Void visitNode(ClassTypeNode n) {
 		printNode(n);
 		for (TypeNode fieldType : n.allFields) visit(fieldType);
