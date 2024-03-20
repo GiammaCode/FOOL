@@ -1,6 +1,9 @@
 package compiler;
 
+import java.lang.reflect.Array;
 import java.util.*;
+
+import com.sun.jdi.ClassType;
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
@@ -275,11 +278,86 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 	// Implementazione Object Oriented
 
+	/*
+
+	All'uscita della dichirazione della classe rimuovo il livello corrente
+	della SymTable
+
+	COME FACCIO AD AGGIORNARE LA VIRTUAL TABLE una volta entrato nella dichiarazione
+	della classe?
+	Come fatto a lezione, a parte che (metodo brutto ma funzionante)
+
+	1) se trovo nome campo o metodo gia presente non lo considero come errore
+	ma come overriding, sostituisco con la nuova stEnty ma con il vecchio
+	offset.
+	Devo sostituire nella stessa posizione praticamente.
+	Non devo consentire però l'overriding Field --> Method e viceversa.
+
+	2) se campo o metodo rimane invariato, uso contatore offset e decremento
+	e incremento.
+
+	COME FACCIO AD AGGIORNARE CLASS TYPE NODE ?
+	viene fatto nel codice della visita di classNode e
+	- per i campu aggionrno array allFields settando -offset-1 al tipo
+	converto l'offset in una posizione.
+	- per i metodi aggiorno allMethod settando offset (il primo è 0)
+	* */
 	@Override
 	public Void visitNode(ClassNode n) {
 		if (print) printNode(n);
+		/*Nella SIMBTABLE di livello 0 viene aggiunto il nome della classe
+		mappato ad una nuova STentry, cosa mettiamo nella StEntry?
+		Offset = -2 e incrementato, il tipo , nl=0
+		Se non eredito il tipo è un nuovo oggetto ClassTypeNode con lista vuota
+		(Field e metodi liste).
+		La gestisco come in VarNode, il type non c'è l'ho e lo creo
+		*/
+		Map<String, STentry> hashmap = symTable.get(nestingLevel);
+		ArrayList<TypeNode> allFields = new ArrayList<>();
+		ArrayList<ArrowTypeNode> allMethods = new ArrayList<>();
+		ClassTypeNode typeNode = new ClassTypeNode(allFields, allMethods);
+		STentry entry = new STentry(nestingLevel, typeNode.getType(),decOffset--);
+		/*
+		Nella CLASS TABLE, invece viene aggiunto il nome della classe associato
+		ad una nuova VIRTUAL TABLE, che funziona come prima (SymTable).
+		Se non eredito la creo vuota.
+		* */
+		Map<String, STentry> virtualTable = new HashMap<>();
+		classTable.put(n.id, virtualTable);
+		if (hashmap.put(n.id, entry) != null){
+			System.out.println("Par id " + n.id + " at line "+ n.getLine() +" already declared");
+			stErrors++;
+		}
+		/*
+		Mentre netriamo nella dichiarazione della classe, creo un nuovo livello
+		per la symTable ma non vuoto, GLI METTO LA VIRTUAL TABLE di prima.
+		* */
+		nestingLevel++;
+		symTable.add(hashmap);
+		//mi preparo per entrare in un nuovo scope.
+		int previosNl = decOffset;
+		decOffset = -2;
+		int fieldOffset = 1;
+		/*Una volta entrato nella dichiarazione della classe:
+		aggiorno Virtual Table e Class Type Node tutte le volte che si
+		incontrano.
+		--> dichiarazione di campo (NO visit FieldNode)
+		--> dichiarazione di metodo (visit MethodNode)
+		n.MethodNode è la methodList
+		* */
+		for(FieldNode fieldNode : n.fieldList){
+
+		}
+		for(MethodNode methodNode : n.methodNode){
+
+		}
+
 		return null;
 	}
+
+	// STentry della classe ID in campo "entry"
+	// ID deve essere in Class Table e STentry presa
+	// direttamente da livello 0 della Symbol Tabl
 	@Override
 	public Void visitNode(NewNode n) {
 		if (print) printNode(n);
