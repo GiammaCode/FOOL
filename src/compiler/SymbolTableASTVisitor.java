@@ -278,30 +278,6 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 
 	// Implementazione Object Oriented
 
-	/*
-
-	All'uscita della dichirazione della classe rimuovo il livello corrente
-	della SymTable
-
-	COME FACCIO AD AGGIORNARE LA VIRTUAL TABLE una volta entrato nella dichiarazione
-	della classe?
-	Come fatto a lezione, a parte che (metodo brutto ma funzionante)
-
-	1) se trovo nome campo o metodo gia presente non lo considero come errore
-	ma come overriding, sostituisco con la nuova stEnty ma con il vecchio
-	offset.
-	Devo sostituire nella stessa posizione praticamente.
-	Non devo consentire però l'overriding Field --> Method e viceversa.
-
-	2) se campo o metodo rimane invariato, uso contatore offset e decremento
-	e incremento.
-
-	COME FACCIO AD AGGIORNARE CLASS TYPE NODE ?
-	viene fatto nel codice della visita di classNode e
-	- per i campu aggionrno array allFields settando -offset-1 al tipo
-	converto l'offset in una posizione.
-	- per i metodi aggiorno allMethod settando offset (il primo è 0)
-	* */
 	@Override
 	public Void visitNode(ClassNode n) {
 		if (print) printNode(n);
@@ -338,20 +314,81 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		int previosNl = decOffset;
 		decOffset = -2;
 		int fieldOffset = 1;
+		int methodOffset=0;
 		/*Una volta entrato nella dichiarazione della classe:
 		aggiorno Virtual Table e Class Type Node tutte le volte che si
 		incontrano.
 		--> dichiarazione di campo (NO visit FieldNode)
 		--> dichiarazione di metodo (visit MethodNode)
 		n.MethodNode è la methodList
+
+		COME FACCIO AD AGGIORNARE LA VIRTUAL TABLE una volta entrato nella dichiarazione
+		della classe?
+		Come fatto a lezione, a parte che (metodo brutto ma funzionante)
+
+		1) se trovo nome campo o metodo gia presente non lo considero come errore
+		ma come overriding, sostituisco con la nuova stEnty ma con il vecchio
+		offset.
+		Devo sostituire nella stessa posizione praticamente.
+		Non devo consentire però l'overriding Field --> Method e viceversa.
+
+		2) se campo o metodo rimane invariato, uso contatore offset e decremento
+		e incremento.
+
+		COME FACCIO AD AGGIORNARE CLASS TYPE NODE ?
+		viene fatto nel codice della visita di classNode e
+		- per i campu aggionrno array allFields settando -offset-1 al tipo
+		converto l'offset in una posizione.
+		- per i metodi aggiorno allMethod settando offset (il primo è 0)
 		* */
 		for(FieldNode fieldNode : n.fieldList){
-
+			STentry fieldSt = new STentry(nestingLevel, fieldNode.getType(), fieldOffset--);
+			if (hashmap.put(fieldNode.id, fieldSt)!= null){
+				System.out.println("Field id " + fieldNode.id + " at line "+ n.getLine() +" already declared");
+				stErrors++;
+			}
+			allFields.add(fieldNode.getType());
 		}
+		//n.methodNode = alla list dei metodi
 		for(MethodNode methodNode : n.methodNode){
+			List<TypeNode> paramMethodTypes = new ArrayList<>();
+			for(ParNode parNode : methodNode.parlist){
+				paramMethodTypes.add(parNode.getType());
+			}
 
+			MethodTypeNode methodType  = new MethodTypeNode(new ArrowTypeNode(paramMethodTypes,methodNode.retType));
+			STentry methodSt = new STentry(nestingLevel, methodType.getType() ,methodOffset++);
+			if (hashmap.put(methodNode.id, methodSt) != null){
+				System.out.println("Method id " + methodNode.id + " at line "+ n.getLine() +" already declared");
+				stErrors++;
+			}
+			allMethods.add(new ArrowTypeNode(paramMethodTypes, methodNode.retType));
+			nestingLevel++;
+			Map<String, STentry> hashMapMethod = new HashMap<>();
+			symTable.add(hashMapMethod);
+			int previousNlMethod = decOffset;
+			decOffset = -2;
+			int parOffset = 1;
+			for (ParNode par : methodNode.parlist) {
+				STentry parEntry = new STentry(nestingLevel,par.getType(),parOffset++);
+				if (hashMapMethod.put(par.id, parEntry) != null) {
+					System.out.println("Par id " + par.id + " at line "+ n.getLine() +" already declared");
+					stErrors++;
+				}
+			}
+			//ora visito le dichiarazioni dei methodi
+			for (Node dec : methodNode.declist){
+				visit(dec);
+			}
+			//visito il corpo del metodo
+			visit(methodNode.exp);
+			symTable.remove(nestingLevel--);
+			decOffset=previousNlMethod;
 		}
-
+		/*All'uscita della dichirazione della classe rimuovo il livello corrente
+		della SymTable.*/
+		symTable.remove(nestingLevel--);
+		decOffset = previosNl;
 		return null;
 	}
 
