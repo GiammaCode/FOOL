@@ -372,16 +372,16 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         for (int i = 0; i < n.nestingLevel - n.stEntry.nl; i++) getAR = nlJoin(getAR, "lw"); //numero di lw uguale alla differenze di nastring level
         return nlJoin(
                 "lfp", //carico il Control Link, puntatore che punta alla funzione chimante
-                argCode,
-                "lfp", getAR,// retrieve address of frame containing "id" declaration
-                "push "+n.stEntry.offset, "add",
+                argCode, //lista di stirnghe coi nomi degli argomenti ordinati al contrario
+                "lfp", getAR,// fa tanti lw pari al alla differenza di nestingLevel
+                "push "+n.stEntry.offset, "add", //trova la classe aggiungendo l'offeset
                 "lw",
                 // by following the static chain (of Access Links)
                 "stm", // set $tm to popped value (with the aim of duplicating top of stack)
                 "ltm", // load Access Link (pointer to frame of function "id" declaration)
                 "ltm", // duplicate top of stack
                 "lw",
-                "push " + n.stEntry.offset, "add", // compute address of "id" declaration
+                "push " + n.methodStentry.offset, "add", // compute address of "id" declaration
                 "lw", // load address of "id" function
                 "js"  // jump to popped address (saving address of subsequent instruction in $ra)
         );
