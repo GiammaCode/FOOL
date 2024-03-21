@@ -287,7 +287,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		(Field e metodi liste).
 		La gestisco come in VarNode, il type non c'è l'ho e lo creo
 		*/
-		Map<String, STentry> hashmap = symTable.get(nestingLevel);
+		Map<String, STentry> hm = symTable.get(nestingLevel);
 		List<TypeNode> allFields = new ArrayList<>();
 		List<ArrowTypeNode> allMethods = new ArrayList<>();
 		ClassTypeNode typeNode = new ClassTypeNode(allFields, allMethods);
@@ -299,7 +299,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		* */
 		Map<String, STentry> virtualTable = new HashMap<>();
 		classTable.put(n.id, virtualTable);
-		if (hashmap.put(n.id, entry) != null){
+		if (hm.put(n.id, entry) != null){
 			System.out.println("Par id " + n.id + " at line "+ n.getLine() +" already declared");
 			stErrors++;
 		}
@@ -312,7 +312,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		//mi preparo per entrare in un nuovo scope.
 		int previosNl = decOffset;
 		decOffset = -2;
-		int fieldOffset = 1;
+		int fieldOffset =-1;
 		int methodOffset=0;
 		/*Una volta entrato nella dichiarazione della classe:
 		aggiorno Virtual Table e Class Type Node tutte le volte che si

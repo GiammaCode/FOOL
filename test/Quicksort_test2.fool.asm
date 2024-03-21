@@ -180,7 +180,7 @@ cfp
 lra
 lfp
 lw
-push 1
+push -1
 add
 lw
 stm
@@ -196,7 +196,7 @@ cfp
 lra
 lfp
 lw
-push 0
+push -2
 add
 lw
 stm

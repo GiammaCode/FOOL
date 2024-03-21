@@ -44,7 +44,7 @@ cfp
 lra
 lfp
 lw
-push 1
+push -1
 add
 lw
 stm
