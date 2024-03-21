@@ -46,6 +46,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 	public Node visitLetInProg(LetInProgContext c) {
 		if (print) printVarAndProdName(c);
 		List<DecNode> declist = new ArrayList<>();
+		for (CldecContext dec : c.cldec()) declist.add((DecNode) visit(dec));
 		for (DecContext dec : c.dec()) declist.add((DecNode) visit(dec));
 		return new ProgLetInNode(declist, visit(c.exp()));
 	}
@@ -272,6 +273,37 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 			n = new ClassNode(fieldList,methodList, c.ID(0).getText());
 			n.setLine(c.CLASS().getSymbol().getLine());
 		}
+		return n;
+	}
+
+	@Override
+	public Node visitMethdec(MethdecContext c) {
+		if (print) printVarAndProdName(c);
+
+		List<ParNode> parList = new ArrayList<>();
+		for (int i = 1; i < c.ID().size(); i++) {
+			// prendiamo gli id ed i type da 1, perchè id(0) è l'id della funzione e type(0) pure.
+			// il type può essere inttype o booltype
+			ParNode p = new ParNode(c.ID(i).getText(),(TypeNode) visit(c.type(i)));
+			p.setLine(c.ID(i).getSymbol().getLine());
+			parList.add(p);
+		}
+
+		// itero sul figlio dec della funzione e scopro tutte le dichiarazione dei figli (var o funzione).
+		// infatti, dalla sua produzione, si capisce che posso averne 0, 1 o più di dichiarazione, quindi itero.
+		List<DecNode> decList = new ArrayList<>();
+		for (DecContext dec : c.dec()) decList.add((DecNode) visit(dec));
+
+		// discorso analogo al visitVarDec: se manca qualcosa torno un nodo null e avrò un errore sintattico.
+		Node n = null;
+		if (c.ID().size()>0) { //non-incomplete ST
+			// abbiamo piu' id e più type (infatti gli diamo il numero, 0 o più)
+			// il corpo si scopre facendo la visita dell'unico figlio exp.
+			// se qualcosa non ti torna guarda sempre la produzione
+			n = new MethodNode(c.ID(0).getText(),(TypeNode) visit(c.type(0)),parList,decList,visit(c.exp()));
+			n.setLine(c.FUN().getSymbol().getLine());
+		}
+
 		return n;
 	}
 

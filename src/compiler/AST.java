@@ -266,9 +266,9 @@ public class AST {
 	*		• ArrayList<ArrowTypeNode> allMethods (tipi funzionali metodi, inclusi ereditati, in ordine apparizione)
 	*/
 	public static class ClassTypeNode extends TypeNode {
-		final ArrayList<TypeNode> allFields;
-		final ArrayList<ArrowTypeNode> allMethods;
-		ClassTypeNode (ArrayList<TypeNode> allFields, ArrayList<ArrowTypeNode> allMethods) {
+		final List<TypeNode> allFields;
+		final List<ArrowTypeNode> allMethods;
+		ClassTypeNode (List<TypeNode> allFields, List<ArrowTypeNode> allMethods) {
 			this.allFields = allFields;
 			this.allMethods = allMethods;
 		}
