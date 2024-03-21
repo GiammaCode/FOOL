@@ -296,14 +296,13 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 
 		// discorso analogo al visitVarDec: se manca qualcosa torno un nodo null e avrò un errore sintattico.
 		Node n = null;
-		if (c.ID().size()>0) { //non-incomplete ST
+		if (!c.ID().isEmpty()) { //non-incomplete ST
 			// abbiamo piu' id e più type (infatti gli diamo il numero, 0 o più)
 			// il corpo si scopre facendo la visita dell'unico figlio exp.
 			// se qualcosa non ti torna guarda sempre la produzione
 			n = new MethodNode(c.ID(0).getText(),(TypeNode) visit(c.type(0)),parList,decList,visit(c.exp()));
 			n.setLine(c.FUN().getSymbol().getLine());
 		}
-
 		return n;
 	}
 
@@ -313,9 +312,4 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		if (print) printVarAndProdName(c);
 		return new RefTypeNode(c.ID().getText());
 	}
-
-
-
-
-
 }
