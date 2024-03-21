@@ -196,7 +196,7 @@ public class AST {
 		final String id;
 		FieldNode (String id, TypeNode t) {
 			this.id=id;
-			type=t;
+			this.type=t;
 		}
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
@@ -244,7 +244,7 @@ public class AST {
 	public static class NewNode extends Node {
 		final List<Node> argList;
 		final String id;
-		STentry stentry;
+		STentry stEntry;
 		NewNode (List<Node> argList, String id) {
 			this.argList=argList;
 			this.id=id;

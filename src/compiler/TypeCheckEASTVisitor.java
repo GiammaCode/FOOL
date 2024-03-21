@@ -357,7 +357,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	public TypeNode visitNode(NewNode n) throws TypeException {
 
 		// recupero tipo e mi aspetto sia RefTypeNode
-		TypeNode t = visit(n.stentry);
+		TypeNode t = visit(n.stEntry);
 		if ( !(t instanceof ClassTypeNode) ) {
 			throw new TypeException("Invocation of a new non-class " + n.id, n.getLine());
 		}

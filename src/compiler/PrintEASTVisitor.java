@@ -247,7 +247,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	public Void visitNode(NewNode n) {
 		printNode(n, "New node with id: " + n.id);
 		for (Node arg : n.argList) visit(arg);
-		visit(n.stentry);//visitiamo l'stEntry del nuovo nodo
+		visit(n.stEntry);//visitiamo l'stEntry del nuovo nodo
 		return null;
 	}
 

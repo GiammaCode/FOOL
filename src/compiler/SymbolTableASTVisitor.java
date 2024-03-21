@@ -1,9 +1,7 @@
 package compiler;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
-import com.sun.jdi.ClassType;
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
@@ -400,7 +398,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			ID deve essere in Class Table e STentry presa
 	 		direttamente da livello 0 della Symbol Table
 			**/
-			n.stentry = this.symTable.get(0).get(n.id);
+			n.stEntry = this.symTable.get(0).get(n.id);
 		}
 		else{
 			System.out.println("Class id" + n.id + " at line "+ n.getLine() +" not declared");

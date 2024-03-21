@@ -422,7 +422,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         }
 
         dispatchPointer = nlJoin(
-                "push " + ( ExecuteVM.MEMSIZE + n.stentry.offset) , //punto dove deve essere caricato il dispach pointer
+                "push " + ( ExecuteVM.MEMSIZE + n.stEntry.offset) , //punto dove deve essere caricato il dispach pointer
                 "lw", //carico il suo id
                 "lhp",
                 "sw" // store word: poppo i due valori dalla cima dello stack. Metto il
