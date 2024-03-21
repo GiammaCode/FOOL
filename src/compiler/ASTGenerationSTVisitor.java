@@ -249,7 +249,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		//popolo la list degli argomenti della chimata di funzione
 		for (ExpContext exp : c.exp()) listNode.add(visit(exp));
 		//l'id della classe è di tipo refTypeNode
-		Node n = new ClassCallNode(new RefTypeNode(c.ID(0).getText()),c.getText(),listNode);
+		Node n = new ClassCallNode(new RefTypeNode(c.ID(0).getText()),c.ID(1).getText(),listNode);
 		n.setLine(c.ID(0).getSymbol().getLine());
 		return n;
 	}
@@ -269,7 +269,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		for (MethdecContext mdec : c.methdec()) methodList.add((MethodNode) visit(mdec));
 		Node n = null;
 		//se non c'è il nome della classe non torno nodo nullo
-		if (c.ID().size()>0) {
+		if (!c.ID().isEmpty()) {
 			n = new ClassNode(fieldList,methodList, c.ID(0).getText());
 			n.setLine(c.CLASS().getSymbol().getLine());
 		}
@@ -305,6 +305,13 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		}
 
 		return n;
+	}
+
+	// Indica la classe (Account, Cane, ecc)
+	@Override
+	public Node visitIdType(IdTypeContext c) {
+		if (print) printVarAndProdName(c);
+		return new RefTypeNode(c.ID().getText());
 	}
 
 
