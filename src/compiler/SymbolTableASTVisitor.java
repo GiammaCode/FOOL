@@ -36,7 +36,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	* */
 	private List<Map<String, STentry>> symTable = new ArrayList<>();
 	private int nestingLevel=0; // Nesting level corrente
-	private int decOffset=-2; // counter for offset of local declarations at current nesting level 
+	private int decOffset=-2; // counter for offset of local declarations at current nesting level
 	int stErrors=0; //tiene il conto degli errori totali
 
 	/*aggiunta della Class Table, a cosa serve?
@@ -45,7 +45,8 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	classe (campi e metodi) una volta che il visitor ha
 	concluso la dichiarazione di una classe.
 	* */
-	private Map< String, Map<String,STentry> > classTable = new HashMap<>();
+
+	private Map<String, Map<String, STentry>> classTable = new HashMap<>();
 
 	SymbolTableASTVisitor() {}
 	SymbolTableASTVisitor(boolean debug) {super(debug);} // enables print for debugging
@@ -440,6 +441,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// n.classID confonde perchè l'ID è dell'oggetto non della classe.
 		// Come facciamo a risalire all'ID della classe? potremmo aggiugnere un campo a reftypenode?
 		STentry entryMethod = virtualTable.get(n.methodID);
+		
 
 		if (entryClass == null){
 			System.out.println("Instance of Class " + n.classID + " at line "+ n.getLine() + " not declared");
