@@ -245,44 +245,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return ckvisit(entry.type); 
 	}
 
-	// 		ESTENSIONE OBJECT ORIENTED
-
-	@Override
-	public TypeNode visitNode(ClassNode n) {
-		if (print) printNode(n);
-		return null;
-	}
-
-	@Override
-	public TypeNode visitNode(FieldNode n) {
-		if (print) printNode(n);
-		return null;
-	}
-
-	@Override
-	public TypeNode visitNode(MethodNode n) {
-		if (print) printNode(n);
-		return null;
-	}
-
-	@Override
-	public TypeNode visitNode(EmptyNode n) {
-		if (print) printNode(n);
-		return null;
-	}
-
-	@Override
-	public TypeNode visitNode(ClassCallNode n) {
-		if (print) printNode(n);
-		return null;
-	}
-
-	@Override
-	public TypeNode visitNode(NewNode n) {
-		if (print) printNode(n);
-		return null;
-	}
-
+	//		OBJECT ORIENTED IMPLEMENTATION
 	@Override
 	public TypeNode visitNode(ClassTypeNode n) {
 		if (print) printNode(n);
@@ -306,4 +269,119 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) printNode(n);
 		return null;
 	}
+
+	// STentry (ritorna campo type). Verrà chiamata quando c'è da sapere il tipo all'interno di una pallina e allora tornerà
+	// il tipo della dichiarazione.
+
+	// non usato (come ParNode)
+	//	@Override
+	//	public TypeNode visitNode(FieldNode node) throws TypeException {
+	//		return super.visitNode(node);
+	//	}
+
+
+	@Override
+	public TypeNode visitNode(MethodNode n) throws TypeException {
+		if (print) printNode(n,n.id);
+
+		for (Node dec : n.declist)
+			try {
+				visit(dec);
+			} catch (IncomplException e) {
+			} catch (TypeException e) {
+				// per non bloccare tutto alla dichiarazione
+				System.out.println("Type checking error in a method declaration: " + e.text);
+			}
+		// anche qua come nella visita della varNode, controlliamo che il corpo del metodo ritorni un tipo correlato
+		// (sottotipo di...) con quello dichiarato (es: se un metodo dichiarato torna int e gli facciamo tornare una stringa
+		// dal corpo della funzione allora non andrà bene!).
+		if ( !isSubtype(visit(n.exp), ckvisit(n.retType)) )
+			throw new TypeException("Wrong return type for method " + n.id,n.getLine());
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassNode n) throws TypeException {
+		if (print) printNode(n,n.id);
+
+		for (MethodNode methodNode : n.methodList) {
+			try {
+				visit(methodNode);
+			} catch (IncomplException e) {
+			} catch (TypeException e) {
+				// per non bloccare tutto alla dichiarazione
+				System.out.println("Type checking error in a method declaration: " + e.text);
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassCallNode n) throws TypeException {
+		if (print) printNode(n,n.classID.id);
+		ArrowTypeNode at;
+
+		// recupero tipo (che mi aspetto essere MethodTypeNode) da STentry. In teoria non sarò sempre e solo un
+		// methodTypeNode?
+		TypeNode t = visit(n.methodStentry);
+
+		if ( !(t instanceof ArrowTypeNode) && !(t instanceof MethodTypeNode) ) {
+			throw new TypeException("Invocation of a non-method " + n.methodID, n.getLine());
+		}
+
+		if (t instanceof MethodTypeNode) {
+			at = ((MethodTypeNode) t).fun;
+		} else {
+			System.out.println("Sono un arrowtype node");
+			at = (ArrowTypeNode) t;
+		}
+
+		// errori possibili (che indicano, in ordine, i controlli da fare):
+		// Invocation of a non-function [id del CallNode]
+		// Wrong number of parameters in the invocation of [id del CallNode]
+		// Wrong type for ...-th parameter in the invocation of [id del CallNode]
+		if ( !(at.parlist.size() == n.listNode.size()) )
+			// caso in cui nella dichiarazione ho un certo numero di argomenti e nell'uso ne ho un numero diverso
+			throw new TypeException("Wrong number of parameters in the invocation of "+n.methodID,n.getLine());
+		for (int i = 0; i < n.listNode.size(); i++)
+			if ( !(isSubtype(visit(n.listNode.get(i)),at.parlist.get(i))) )
+				// caso in cui nella dichiarazione ho certi tipi negli argomenti e nell'uso ne ho tipi diversi
+				throw new TypeException("Wrong type for "+(i+1)+"-th parameter in the invocation of "+n.methodID,n.getLine());
+
+		// dopo i check restituisco il tipo di ritorno della funzione, perchè vuol dire che tutto è andato bene.
+		return at.ret;
+	}
+
+	@Override
+	public TypeNode visitNode(NewNode n) throws TypeException {
+
+		// recupero tipo e mi aspetto sia RefTypeNode
+		TypeNode t = visit(n.stentry);
+		if ( !(t instanceof ClassTypeNode) ) {
+			throw new TypeException("Invocation of a new non-class " + n.id, n.getLine());
+		}
+
+		ClassTypeNode at = (ClassTypeNode) t;
+
+		// errori possibili (che indicano, in ordine, i controlli da fare):
+		// Invocation of a new non-class
+		// Wrong number of parameters in the invocation of new non-class
+		// Wrong type for ...-th parameter in the invocation of new non-class
+		if ( !(at.allFields.size() == n.argList.size()) )
+			// caso in cui nella dichiarazione ho un certo numero di argomenti e nell'uso ne ho un numero diverso
+			throw new TypeException("Wrong number of parameters in the invocation of "+n.id,n.getLine());
+		for (int i = 0; i < n.argList.size(); i++)
+			if ( !(isSubtype(visit(n.argList.get(i)),at.allFields.get(i))) )
+				// caso in cui nella dichiarazione ho certi tipi negli argomenti e nell'uso ne ho tipi diversi
+				throw new TypeException("Wrong type for "+(i+1)+"-th parameter in the invocation of "+n.id,n.getLine());
+
+		return new RefTypeNode(n.id);
+	}
+
+	@Override
+	public TypeNode visitNode(EmptyNode n) throws TypeException {
+		return new EmptyTypeNode();
+	}
+
 }
