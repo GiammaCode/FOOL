@@ -223,7 +223,7 @@ public class AST {
 	}
 
 	//nodo chiamata di una classe, es: nameClass.setValue(x);
-	public static class ClassCallNode extends DecNode {
+	public static class ClassCallNode extends Node {
 		final RefTypeNode classID;
 		final List<Node> listNode;
 		final String methodID;
@@ -240,7 +240,7 @@ public class AST {
 	}
 
 	//nodo relativo alla new ID
-	public static class NewNode extends DecNode {
+	public static class NewNode extends Node {
 		final List<Node> argList;
 		final String id;
 		STentry stentry;
@@ -253,7 +253,7 @@ public class AST {
 	}
 
 	//nodo del null, non implementato perchè null.
-	public static class EmptyNode extends DecNode {
+	public static class EmptyNode extends Node {
 		//non implementato per chè null
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
@@ -264,7 +264,7 @@ public class AST {
 	*		• ArrayList<TypeNode> allFields (tipi dei campi, inclusi quelli ereditati, in ordine di apparizione)
 	*		• ArrayList<ArrowTypeNode> allMethods (tipi funzionali metodi, inclusi ereditati, in ordine apparizione)
 	*/
-	public static class ClassTypeNode extends DecNode {
+	public static class ClassTypeNode extends TypeNode {
 		final ArrayList<TypeNode> allFields;
 		final ArrayList<ArrowTypeNode> allMethods;
 		ClassTypeNode (ArrayList<TypeNode> allFields, ArrayList<ArrowTypeNode> allMethods) {
@@ -278,7 +278,7 @@ public class AST {
 	*	MethodTypeNode ha come campo il tipo funzionale:
 	*			• final ArrowTypeNode fun
 	*/
-	public static class MethodTypeNode extends DecNode {
+	public static class MethodTypeNode extends TypeNode {
 		final ArrowTypeNode fun;
 		MethodTypeNode (ArrowTypeNode fun) {
 			this.fun = fun;
@@ -287,7 +287,7 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-	public static class RefTypeNode extends DecNode {
+	public static class RefTypeNode extends TypeNode {
 		final String id;
 		RefTypeNode (String id) {   //da rivedere
 			this.id=id;
@@ -296,7 +296,7 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-	public static class EmptyTypeNode extends DecNode {
+	public static class EmptyTypeNode extends TypeNode {
 		//non implementato perchè null
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}

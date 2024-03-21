@@ -293,7 +293,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		ArrayList<TypeNode> allFields = new ArrayList<>();
 		ArrayList<ArrowTypeNode> allMethods = new ArrayList<>();
 		ClassTypeNode typeNode = new ClassTypeNode(allFields, allMethods);
-		STentry entry = new STentry(nestingLevel, typeNode.getType(),decOffset--);
+		STentry entry = new STentry(nestingLevel, typeNode,decOffset--);
 		/*
 		Nella CLASS TABLE, invece viene aggiunto il nome della classe associato
 		ad una nuova VIRTUAL TABLE, che funziona come prima (SymTable).
@@ -357,7 +357,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			}
 
 			MethodTypeNode methodType  = new MethodTypeNode(new ArrowTypeNode(paramMethodTypes,methodNode.retType));
-			STentry methodSt = new STentry(nestingLevel, methodType.getType() ,methodOffset++);
+			STentry methodSt = new STentry(nestingLevel, methodType ,methodOffset++);
 			if (hashmap.put(methodNode.id, methodSt) != null){
 				System.out.println("Method id " + methodNode.id + " at line "+ n.getLine() +" already declared");
 				stErrors++;
@@ -440,7 +440,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// n.classID confonde perchè l'ID è dell'oggetto non della classe.
 		// Come facciamo a risalire all'ID della classe? potremmo aggiugnere un campo a reftypenode?
 		STentry entryMethod = virtualTable.get(n.methodID);
-		
+
 
 		if (entryClass == null){
 			System.out.println("Instance of Class " + n.classID + " at line "+ n.getLine() + " not declared");
