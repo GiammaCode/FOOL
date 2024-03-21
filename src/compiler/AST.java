@@ -175,6 +175,7 @@ public class AST {
 	//							OBJECT ORIENTED EXTENSION
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//x:A= new A() / new B() se B è sottotipo / new C() se C è sottotipo di B che è sottotipo di A
 	//nodo classe
 	public static class ClassNode extends DecNode {
 		final String id;
