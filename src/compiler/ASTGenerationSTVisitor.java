@@ -242,6 +242,8 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		return new EmptyNode();
 	}
 
+
+
 	public Node visitDotCall(DotCallContext c ) {
 		if (print) printVarAndProdName(c);
 		List<Node> listNode = new ArrayList<>();
@@ -268,7 +270,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		for (MethdecContext mdec : c.methdec()) methodList.add((MethodNode) visit(mdec));
 		Node n = null;
 		//se non c'è il nome della classe non torno nodo nullo
-		if (c.ID().size()>0) {
+		if (!c.ID().isEmpty()) {
 			n = new ClassNode(fieldList,methodList, c.ID(0).getText());
 			n.setLine(c.CLASS().getSymbol().getLine());
 		}

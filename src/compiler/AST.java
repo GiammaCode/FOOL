@@ -175,7 +175,6 @@ public class AST {
 	//							OBJECT ORIENTED EXTENSION
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//x:A= new A() / new B() se B è sottotipo / new C() se C è sottotipo di B che è sottotipo di A
 	//nodo classe
 	public static class ClassNode extends DecNode {
 		final String id;
@@ -266,6 +265,8 @@ public class AST {
 	*		• ArrayList<ArrowTypeNode> allMethods (tipi funzionali metodi, inclusi ereditati, in ordine apparizione)
 	*/
 	public static class ClassTypeNode extends TypeNode {
+
+
 		final ArrayList<TypeNode> allFields;
 		final ArrayList<ArrowTypeNode> allMethods;
 		ClassTypeNode (ArrayList<TypeNode> allFields, ArrayList<ArrowTypeNode> allMethods) {
