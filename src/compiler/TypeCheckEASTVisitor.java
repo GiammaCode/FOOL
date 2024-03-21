@@ -217,8 +217,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return new IntTypeNode();
 	}
 
-// gestione tipi incompleti	(se lo sono lancia eccezione)
-	
+	// gestione tipi incompleti	(se lo sono lancia eccezione)
 	@Override
 	public TypeNode visitNode(ArrowTypeNode n) throws TypeException {
 		if (print) printNode(n);
@@ -239,12 +238,72 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return null;
 	}
 
-// STentry (ritorna campo type)
-
+	// STentry (ritorna campo type)
 	@Override
 	public TypeNode visitSTentry(STentry entry) throws TypeException {
 		if (print) printSTentry("type");
 		return ckvisit(entry.type); 
 	}
 
+	// 		ESTENSIONE OBJECT ORIENTED
+
+	@Override
+	public TypeNode visitNode(ClassNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(FieldNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(MethodNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(EmptyNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassCallNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(NewNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassTypeNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(MethodTypeNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(RefTypeNode n) {
+		if (print) printNode(n);
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(EmptyTypeNode n) {
+		if (print) printNode(n);
+		return null;
+	}
 }
