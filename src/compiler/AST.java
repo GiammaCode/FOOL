@@ -1,6 +1,5 @@
 package compiler;
 
-import java.lang.ref.SoftReference;
 import java.util.*;
 import compiler.lib.*;
 
@@ -180,11 +179,11 @@ public class AST {
 	public static class ClassNode extends DecNode {
 		final String id;
 		final List<FieldNode> fieldList;
-		final List<MethodNode> methodNode;
+		final List<MethodNode> methodList;
 		ClassNode(List<FieldNode> fieldList, List<MethodNode> methodList, String id) {
 			//la classe una volta dichiarata possiede quei metodi e campi e non è più modificabile
 			this.fieldList=Collections.unmodifiableList(fieldList);
-			this.methodNode=Collections.unmodifiableList(methodList);
+			this.methodList =Collections.unmodifiableList(methodList);
 			this.id=id;
 		}
 		@Override
@@ -228,7 +227,7 @@ public class AST {
 		final RefTypeNode classID;
 		final List<Node> listNode;
 		final String methodID;
-		STentry stEntry; //??
+		STentry stEntry;
 		STentry methodStentry;
 		int nestingLevel;
 		ClassCallNode (RefTypeNode classID, String methodID, List<Node> listNode) {

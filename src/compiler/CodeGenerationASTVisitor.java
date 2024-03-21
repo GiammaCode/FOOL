@@ -3,6 +3,10 @@ package compiler;
 import compiler.AST.*;
 import compiler.lib.*;
 import compiler.exc.*;
+import svm.ExecuteVM;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static compiler.lib.FOOLlib.*;
 
@@ -254,7 +258,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
                 "lfp", // load Control Link (pointer to frame of function "id" caller)
                 argCode, // generate code for argument expressions in reversed order
                 "lfp", getAR, // retrieve address of frame containing "id" declaration
-                // by following the static chain (of Access Links)
+                                // by following the static chain (of Access Links)
                 "stm", // set $tm to popped value (with the aim of duplicating top of stack)
                 "ltm", // load Access Link (pointer to frame of function "id" declaration)
                 "ltm", // duplicate top of stack
@@ -289,15 +293,46 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         return "push " + n.val;
     }
 
+
+
     //Implementazione Object Oriented
     @Override
     public String visitNode(ClassNode n) {
-        return null;
+        if(print) printNode(n);
+        List<String> dispachTaple = new ArrayList<>();  //arraylist?
+        //visito tutti i methodNode della classe
+        for (MethodNode method : n.methodList){
+            visit(method);
+            //Inserisco le label dei metodi dentro la dispachTale, l'offeset inserendoli così è corretto
+            dispachTaple.add(method.label);
+        }
+        String heapLabel= null;
+        for(String label: dispachTaple){
+            // Per ogni label, salviamo l'indirizzo della label nell'heap successivamente incrementiamo hp.
+            heapLabel = nlJoin(heapLabel,
+                    "push " + label, // pusho sullo stack l'indirizzo (la label) dell'etichetta
+                    "lhp", // pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "sw", // store word: poppo i due valori dalla cima dello stack. Metto il secondo all'indirizzo puntato dal primo
+                    "lhp", //  pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "push 1", // aggiungo 1
+                    "add", // li sommo assieme
+                    "shp"); // poppo il valore di hp aumentato e lo inserisco nuovamente nel registro hp
+        }
+        return nlJoin(
+                "lhp",  // Pusho sullo stack il valore di hp prima di incrementarlo. Questo sarà il punto di inizio
+                heapLabel //  Scorro tutta la dispachTable e per ciascuna etichetta la memorizzo a indirizzo hp per poi incrementarlo
+
+        );
     }
+
+
 
     //FieldNode come ParNode non utilizzato.
     //public String visitNode(FieldNode n) {}
 
+
+
+    //simile a funNode ma con il campo label
     @Override
     public String visitNode(MethodNode n) {
         if (print) printNode(n, n.id);
@@ -331,7 +366,25 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
     @Override
     public String visitNode(ClassCallNode n) {
-        return null;
+        if (print) printNode(n);
+        String argCode = null, getAR = null;
+        for (int i = n.listNode.size() - 1; i >= 0; i--) argCode = nlJoin(argCode, visit(n.listNode.get(i))); //lista di stirnghe coi nomi degli argomenti ordinati al contrario
+        for (int i = 0; i < n.nestingLevel - n.stEntry.nl; i++) getAR = nlJoin(getAR, "lw"); //numero di lw uguale alla differenze di nastring level
+        return nlJoin(
+                "lfp", //carico il Control Link, puntatore che punta alla funzione chimante
+                argCode,
+                "lfp", getAR,// retrieve address of frame containing "id" declaration
+                "push "+n.stEntry.offset, "add",
+                "lw",
+                // by following the static chain (of Access Links)
+                "stm", // set $tm to popped value (with the aim of duplicating top of stack)
+                "ltm", // load Access Link (pointer to frame of function "id" declaration)
+                "ltm", // duplicate top of stack
+                "lw",
+                "push " + n.stEntry.offset, "add", // compute address of "id" declaration
+                "lw", // load address of "id" function
+                "js"  // jump to popped address (saving address of subsequent instruction in $ra)
+        );
     }
 
     @Override
@@ -340,8 +393,55 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         return "push -1 ";
     }
 
+    //la new prende in ingresso i parametri che diventeranno i campi della classe
+    //prima prendo tutti gli argomenti che metteno ciscuno il loro valore nello stack
+    //poi prendo i valori degli argomenti uno alla volta e il metto nello heap, incrementando hp ogni volta
+    //ad indirizzo(memsize+offset) hp infine inserisco il dispach pointer(puntatore alla dispach table)
+   //carico sullo stack il valore di hp(object pointer) e lo incremento
     @Override
     public String visitNode(NewNode n) {
-        return null;
+
+        String fieldsOnStack = null;
+        String fieldsOnHeap = null;
+        String dispatchPointer = null;
+
+        for(Node param : n.argList) {
+            fieldsOnStack = nlJoin(fieldsOnStack,visit(param)); // mettiamo sullo stack tutti i valori degli argomenti
+
+            // prende i valori degli argomenti, uno alla volta, dallo stack e li
+            // mette nello heap, incrementando $hp dopo ogni singola copia
+            fieldsOnHeap = nlJoin(fieldsOnHeap,
+                    "lhp", // pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "sw", // store word: poppo i due valori dalla cima dello stack. Metto il
+                    // secondo all'indirizzo puntato dal primo
+                    "lhp", // pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "push "+ 1, // aggiungo 1
+                    "add", // li sommo assieme
+                    "shp"); // poppo il valore di hp aumentato (messo sullo stack e sommato ad 1)
+                                // e poi lo ricarico nel registro hp
+        }
+
+        dispatchPointer = nlJoin(
+                "push " + ( ExecuteVM.MEMSIZE + n.stentry.offset) , //punto dove deve essere caricato il dispach pointer
+                "lw", //carico il suo id
+                "lhp",
+                "sw" // store word: poppo i due valori dalla cima dello stack. Metto il
+                // secondo all'indirizzo puntato dal primo
+                );
+
+        return nlJoin(fieldsOnStack, // prima si richiama su tutti gli argomenti in ordine di apparizione
+                // (che mettono ciascuno il loro valore calcolato sullo stack)
+                fieldsOnHeap, // prende i valori degli argomenti, uno alla volta, dallo stack e li
+                // mette nello heap, incrementando $hp dopo ogni singola copia
+
+                dispatchPointer,		  // scrive a indirizzo $hp il dispatch pointer recuperandolo da
+                // contenuto indirizzo MEMSIZE + offset classe ID
+                "lhp",	// carica sullo stack il valore di $hp (indirizzo object pointer da ritornare) e incrementa $hp
+                "lhp", //devo duplicarlo perchè quando lo addo lo tolgo
+                "push 1",
+                "add",
+                "shp" // poppo il valore di hp aumentato (messo sullo stack e sommato ad 1)
+                      // e poi lo ricarico nel registro hp
+        );
     }
 }
