@@ -36,7 +36,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	* */
 	private List<Map<String, STentry>> symTable = new ArrayList<>();
 	private int nestingLevel=0; // Nesting level corrente
-	private int decOffset=-2; // counter for offset of local declarations at current nesting level 
+	private int decOffset=-2; // counter for offset of local declarations at current nesting level
 	int stErrors=0; //tiene il conto degli errori totali
 
 	/*aggiunta della Class Table, a cosa serve?
@@ -45,7 +45,8 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	classe (campi e metodi) una volta che il visitor ha
 	concluso la dichiarazione di una classe.
 	* */
-	private Map< String, Map<String,STentry> > classTable = new HashMap<>();
+
+	private Map<String, Map<String, STentry>> classTable = new HashMap<>();
 
 	SymbolTableASTVisitor() {}
 	SymbolTableASTVisitor(boolean debug) {super(debug);} // enables print for debugging
@@ -390,25 +391,70 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		decOffset = previosNl;
 		return null;
 	}
-
-	// STentry della classe ID in campo "entry"
-	// ID deve essere in Class Table e STentry presa
-	// direttamente da livello 0 della Symbol Tabl
 	@Override
 	public Void visitNode(NewNode n) {
 		if (print) printNode(n);
+		//controllo che n.id esiste, cioè esiste la classe di cui facciamo new
+		if (this.classTable.containsKey(n.id)){
+			/* 	STentry della classe ID in campo "entry"
+			ID deve essere in Class Table e STentry presa
+	 		direttamente da livello 0 della Symbol Table
+			**/
+			n.stentry = this.symTable.get(0).get(n.id);
+		}
+		else{
+			System.out.println("Class id" + n.id + " at line "+ n.getLine() +" not declared");
+			stErrors++;
+		}
+		//faccio la visit per ogni argomento passato alla classe
+		for (Node node : n.argList) visit(node);
 		return null;
 	}
-
 	@Override
 	public Void visitNode(EmptyNode n) {
 		if (print) printNode(n);
 		return null;
 	}
 
+	/*ID1.ID2 dove id1 è una variabile, quindi la devo andare a cercare
+	quindi ricupero la sua STentry, invece id2 dove lo cerco?
+	Lo cerco nella virtual table del tipo statico di ID1, come trovo il tipo
+	statico? Il tipo statico si trova nell'stEntry ID1 e guardo il type
+	che deve essere un RefTypeNode (li dentro c'è il nome della classe)
+	Trovato il nome della classe, vado nella class Table e poi raggiungo la
+	virtual Table e trovo stEntry di ID2 (il metodo)
+
+	C'é una possibilità di errore perchè se ID1 non è RefTypeNode
+	la notazione '.' (punto) è sbagliata.
+	* */
 	@Override
 	public Void visitNode(ClassCallNode n) {
 		if (print) printNode(n);
+
+		//cerco la dichirazione della classe in quel livello o in quelli superiori
+		STentry entryClass = stLookup(n.classID.id);
+		//cerco la dichiarazione metodo nella virtual table
+		Map<String, STentry> virtualTable = classTable.get(((RefTypeNode)entryClass.type).id);
+		System.out.println(((RefTypeNode)entryClass.type).id);
+		// id è il nome dell'oggetto e non della classe, come mai?
+		// n.classID confonde perchè l'ID è dell'oggetto non della classe.
+		// Come facciamo a risalire all'ID della classe? potremmo aggiugnere un campo a reftypenode?
+		STentry entryMethod = virtualTable.get(n.methodID);
+		
+
+		if (entryClass == null){
+			System.out.println("Instance of Class " + n.classID + " at line "+ n.getLine() + " not declared");
+			stErrors++;
+		} else if (entryMethod == null) {
+			System.out.println("Method "+ n.methodID + " of Class " + n.classID + " at line "+ n.getLine() + " not declared");
+			stErrors++;
+		}
+		else {
+			// se la trovo attacco la classNode e methodNode all' classCallNode.
+			n.stEntry = entryClass; // nesting level 0
+			n.methodStentry = entryMethod; // nesting level 1
+			n.nestingLevel = nestingLevel; // nesting level dell'uso
+		}
 		return null;
 	}
 
