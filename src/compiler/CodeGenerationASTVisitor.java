@@ -3,6 +3,7 @@ package compiler;
 import compiler.AST.*;
 import compiler.lib.*;
 import compiler.exc.*;
+import svm.ExecuteVM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -292,6 +293,8 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         return "push " + n.val;
     }
 
+
+
     //Implementazione Object Oriented
     @Override
     public String visitNode(ClassNode n) {
@@ -365,11 +368,11 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     public String visitNode(ClassCallNode n) {
         if (print) printNode(n);
         String argCode = null, getAR = null;
-        for (int i = n.listNode.size() - 1; i >= 0; i--) argCode = nlJoin(argCode, visit(n.listNode.get(i)));
-        for (int i = 0; i < n.nestingLevel - n.stEntry.nl; i++) getAR = nlJoin(getAR, "lw");
+        for (int i = n.listNode.size() - 1; i >= 0; i--) argCode = nlJoin(argCode, visit(n.listNode.get(i))); //lista di stirnghe coi nomi degli argomenti ordinati al contrario
+        for (int i = 0; i < n.nestingLevel - n.stEntry.nl; i++) getAR = nlJoin(getAR, "lw"); //numero di lw uguale alla differenze di nastring level
         return nlJoin(
                 "lfp", //carico il Control Link, puntatore che punta alla funzione chimante
-                argCode, // generate code for argument expressions in reversed order
+                argCode,
                 "lfp", getAR,// retrieve address of frame containing "id" declaration
                 "push "+n.stEntry.offset, "add",
                 "lw",
@@ -390,8 +393,55 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         return "push -1 ";
     }
 
+    //la new prende in ingresso i parametri che diventeranno i campi della classe
+    //prima prendo tutti gli argomenti che metteno ciscuno il loro valore nello stack
+    //poi prendo i valori degli argomenti uno alla volta e il metto nello heap, incrementando hp ogni volta
+    //ad indirizzo(memsize+offset) hp infine inserisco il dispach pointer(puntatore alla dispach table)
+   //carico sullo stack il valore di hp(object pointer) e lo incremento
     @Override
     public String visitNode(NewNode n) {
-        return null;
+
+        String fieldsOnStack = null;
+        String fieldsOnHeap = null;
+        String dispatchPointer = null;
+
+        for(Node param : n.argList) {
+            fieldsOnStack = nlJoin(fieldsOnStack,visit(param)); // mettiamo sullo stack tutti i valori degli argomenti
+
+            // prende i valori degli argomenti, uno alla volta, dallo stack e li
+            // mette nello heap, incrementando $hp dopo ogni singola copia
+            fieldsOnHeap = nlJoin(fieldsOnHeap,
+                    "lhp", // pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "sw", // store word: poppo i due valori dalla cima dello stack. Metto il
+                    // secondo all'indirizzo puntato dal primo
+                    "lhp", // pusho sullo stack il contenuto del registro hp (heap pointer)
+                    "push "+ 1, // aggiungo 1
+                    "add", // li sommo assieme
+                    "shp"); // poppo il valore di hp aumentato (messo sullo stack e sommato ad 1)
+                                // e poi lo ricarico nel registro hp
+        }
+
+        dispatchPointer = nlJoin(
+                "push " + ( ExecuteVM.MEMSIZE + n.stentry.offset) , //punto dove deve essere caricato il dispach pointer
+                "lw", //carico il suo id
+                "lhp",
+                "sw" // store word: poppo i due valori dalla cima dello stack. Metto il
+                // secondo all'indirizzo puntato dal primo
+                );
+
+        return nlJoin(fieldsOnStack, // prima si richiama su tutti gli argomenti in ordine di apparizione
+                // (che mettono ciascuno il loro valore calcolato sullo stack)
+                fieldsOnHeap, // prende i valori degli argomenti, uno alla volta, dallo stack e li
+                // mette nello heap, incrementando $hp dopo ogni singola copia
+
+                dispatchPointer,		  // scrive a indirizzo $hp il dispatch pointer recuperandolo da
+                // contenuto indirizzo MEMSIZE + offset classe ID
+                "lhp",	// carica sullo stack il valore di $hp (indirizzo object pointer da ritornare) e incrementa $hp
+                "lhp", //devo duplicarlo perchè quando lo addo lo tolgo
+                "push 1",
+                "add",
+                "shp" // poppo il valore di hp aumentato (messo sullo stack e sommato ad 1)
+                      // e poi lo ricarico nel registro hp
+        );
     }
 }
