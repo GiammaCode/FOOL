@@ -9,8 +9,9 @@ import svm.*;
 
 public class Test {
     public static void main(String[] args) throws Exception {
-   			
-    	String fileName = "test/Quicksort_test2.fool";
+
+		String fileName = "test/provaBase.fool";
+    	//String fileName = "test/Quicksort_test2.fool";
     	CharStream chars = CharStreams.fromFileName(fileName);
 		/*
 		 * Il lexer data una sequenza di caratteri, li aggrega in token di opportune categorie
