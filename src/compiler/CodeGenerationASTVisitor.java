@@ -366,10 +366,10 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
     @Override
     public String visitNode(ClassCallNode n) {
-        if (print) printNode(n);
+        if (print) printNode(n, n.methodID);
         String argCode = null, getAR = null;
-        for (int i = n.listNode.size() - 1; i >= 0; i--) argCode = nlJoin(argCode, visit(n.listNode.get(i))); //lista di stirnghe coi nomi degli argomenti ordinati al contrario
-        for (int i = 0; i < n.nestingLevel - n.stEntry.nl; i++) getAR = nlJoin(getAR, "lw"); //numero di lw uguale alla differenze di nastring level
+        for (int i = n.listNode.size()-1; i>=0; i--) argCode = nlJoin(argCode, visit(n.listNode.get(i))); //lista di stirnghe coi nomi degli argomenti ordinati al contrario
+        for (int i = 0; i < n.nestingLevel-n.stEntry.nl; i++) getAR = nlJoin(getAR, "lw"); //numero di lw uguale alla differenze di nastring level
         return nlJoin(
                 "lfp", //carico il Control Link, puntatore che punta alla funzione chimante
                 argCode, //lista di stirnghe coi nomi degli argomenti ordinati al contrario
@@ -390,7 +390,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     @Override
     public String visitNode(EmptyNode n) {
         if (print) printNode(n);
-        return "push -1 ";
+        return "push " + -1;
     }
 
     //la new prende in ingresso i parametri che diventeranno i campi della classe
@@ -403,7 +403,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
         String fieldsOnStack = null;
         String fieldsOnHeap = null;
-        String dispatchPointer = null;
+        String dispatchPointer;
 
         for(Node param : n.argList) {
             fieldsOnStack = nlJoin(fieldsOnStack,visit(param)); // mettiamo sullo stack tutti i valori degli argomenti
