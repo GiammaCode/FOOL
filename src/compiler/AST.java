@@ -3,10 +3,6 @@ package compiler;
 import java.util.*;
 import compiler.lib.*;
 
-/*
- *	accept()  accetta un qualunque baseASTVisitor dato che tutti gli ASTVisitor estendono il base
- *
- */
 public class AST {
 	
 	public static class ProgLetInNode extends Node {
