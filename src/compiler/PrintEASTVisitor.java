@@ -74,6 +74,62 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	}
 
 	@Override
+	public Void visitNode(CallNode n) {
+		printNode(n,n.id+" at nestinglevel "+n.nl);
+		visit(n.entry);
+		for (Node arg : n.arglist) visit(arg);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(IdNode n) {
+		printNode(n,n.id+" at nestinglevel "+n.nl);
+		visit(n.entry);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(BoolNode n) {
+		printNode(n,n.val.toString());
+		return null;
+	}
+
+	@Override
+	public Void visitNode(IntNode n) {
+		printNode(n,n.val.toString());
+		return null;
+	}
+
+	@Override
+	public Void visitNode(ArrowTypeNode n) {
+		printNode(n);
+		for (Node par: n.parlist) visit(par);
+		visit(n.ret,"->"); //marks return type
+		return null;
+	}
+
+	@Override
+	public Void visitNode(BoolTypeNode n) {
+		printNode(n);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(IntTypeNode n) {
+		printNode(n);
+		return null;
+	}
+
+	@Override
+	public Void visitSTentry(STentry entry) {
+		printSTentry("nestlev "+entry.nl);
+		printSTentry("type");
+		visit(entry.type);
+		printSTentry("offset "+entry.offset);
+		return null;
+	}
+
+	@Override
 	public Void visitNode(EqualNode n) {
 		printNode(n);
 		visit(n.left);
@@ -81,6 +137,23 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 		return null;
 	}
 
+	@Override
+	public Void visitNode(TimesNode n) {
+		printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(MinusNode n) {
+		printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	//////////////////////////// OPERATOR EXTENSION ////////////////////////////////////////////////////////////////////
 	@Override
 	public Void visitNode(GreaterEqualNode n) {
 		printNode(n);
@@ -98,14 +171,6 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	}
 
 	@Override
-	public Void visitNode(TimesNode n) {
-		printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
 	public Void visitNode(DivNode n) {
 		printNode(n);
 		visit(n.left);
@@ -115,13 +180,6 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 
 	@Override
 	public Void visitNode(PlusNode n) {
-		printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-	@Override
-	public Void visitNode(MinusNode n) {
 		printNode(n);
 		visit(n.left);
 		visit(n.right);
@@ -151,63 +209,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 		return null;
 	}
 
-	@Override
-	public Void visitNode(CallNode n) {
-		printNode(n,n.id+" at nestinglevel "+n.nl); 
-		visit(n.entry);
-		for (Node arg : n.arglist) visit(arg);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(IdNode n) {
-		printNode(n,n.id+" at nestinglevel "+n.nl); 
-		visit(n.entry);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(BoolNode n) {
-		printNode(n,n.val.toString());
-		return null;
-	}
-
-	@Override
-	public Void visitNode(IntNode n) {
-		printNode(n,n.val.toString());
-		return null;
-	}
-	
-	@Override
-	public Void visitNode(ArrowTypeNode n) {
-		printNode(n);
-		for (Node par: n.parlist) visit(par);
-		visit(n.ret,"->"); //marks return type
-		return null;
-	}
-
-	@Override
-	public Void visitNode(BoolTypeNode n) {
-		printNode(n);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(IntTypeNode n) {
-		printNode(n);
-		return null;
-	}
-	
-	@Override
-	public Void visitSTentry(STentry entry) {
-		printSTentry("nestlev "+entry.nl);
-		printSTentry("type");
-		visit(entry.type);
-		printSTentry("offset "+entry.offset);
-		return null;
-	}
-
-	// OO Implementation
+	//////////////////////////// OBJECT ORIENTED EXTENSION /////////////////////////////////////////////////////////////
 	@Override
 	public Void visitNode(ClassNode n) {
 		printNode(n, "Class id: " + n.id);
@@ -257,6 +259,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 		return null;
 	}
 
+	//////////////////////////// OBJECT ORIENTED TYPE EXTENSION ////////////////////////////////////////////////////////
 	@Override
 	public Void visitNode(ClassTypeNode n) {
 		printNode(n);
@@ -283,4 +286,5 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 		printNode(n);
 		return null;
 	}
+
 }
