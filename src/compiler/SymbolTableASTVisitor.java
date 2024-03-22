@@ -430,7 +430,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	public Void visitNode(ClassCallNode n) {
 		if (print) printNode(n);
 
-		//cerco la dichirazione della classe in quel livello o in quelli superiori
+		//cerco la dichirazione della classe in quel livello o in quelli superiori, entryClass non è mai null
 		STentry entryClass = stLookup(n.classID.id);
 		//cerco la dichiarazione metodo nella virtual table
 		Map<String, STentry> virtualTable = classTable.get(((RefTypeNode)entryClass.type).id);
@@ -440,11 +440,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// Come facciamo a risalire all'ID della classe? potremmo aggiugnere un campo a reftypenode?
 		STentry entryMethod = virtualTable.get(n.methodID);
 
-
-		if (entryClass == null){
-			System.out.println("Instance of Class " + n.classID + " at line "+ n.getLine() + " not declared");
-			stErrors++;
-		} else if (entryMethod == null) {
+		if (entryMethod == null) {
 			System.out.println("Method "+ n.methodID + " of Class " + n.classID + " at line "+ n.getLine() + " not declared");
 			stErrors++;
 		}
