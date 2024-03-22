@@ -341,55 +341,16 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		converto l'offset in una posizione.
 		- per i metodi aggiorno allMethod settando offset (il primo è 0)
 		* */
-		for(FieldNode fieldNode : n.fieldList){
-			STentry fieldSt = new STentry(nestingLevel, fieldNode.getType(), fieldOffset--);
-			if (virtualTable.put(fieldNode.id, fieldSt)!= null){
-				System.out.println("Field id " + fieldNode.id + " at line "+ n.getLine() +" already declared");
-				stErrors++;
-			}
-			allFields.add(fieldNode.getType());
-		}
-		for(MethodNode methodNode : n.methodList){
-			List<TypeNode> paramMethodTypes = new ArrayList<>();
-			for(ParNode parNode : methodNode.parlist){
-				paramMethodTypes.add(parNode.getType());
-			}
+		updateDecOfField(n, virtualTable, fieldOffset, allFields);
+		updateDecOfMethod(n, virtualTable, methodOffset, allMethods, symTable);
 
-			MethodTypeNode methodType  = new MethodTypeNode(new ArrowTypeNode(paramMethodTypes,methodNode.retType));
-			STentry methodSt = new STentry(nestingLevel, methodType ,methodOffset++);
-			if (virtualTable.put(methodNode.id, methodSt) != null){
-				System.out.println("Method id " + methodNode.id + " at line "+ n.getLine() +" already declared");
-				stErrors++;
-			}
-			allMethods.add(new ArrowTypeNode(paramMethodTypes, methodNode.retType));
-			nestingLevel++;
-			Map<String, STentry> hashMapMethod = new HashMap<>();
-			symTable.add(hashMapMethod);
-			int previousNlMethod = decOffset;
-			decOffset = -2;
-			int parOffset = 1;
-			for (ParNode par : methodNode.parlist) {
-				STentry parEntry = new STentry(nestingLevel,par.getType(),parOffset++);
-				if (hashMapMethod.put(par.id, parEntry) != null) {
-					System.out.println("Par id " + par.id + " at line "+ n.getLine() +" already declared");
-					stErrors++;
-				}
-			}
-			//ora visito le dichiarazioni dei methodi
-			for (Node dec : methodNode.declist){
-				visit(dec);
-			}
-			//visito il corpo del metodo
-			visit(methodNode.exp);
-			symTable.remove(nestingLevel--);
-			decOffset=previousNlMethod;
-		}
 		/*All'uscita della dichirazione della classe rimuovo il livello corrente
 		della SymTable.*/
 		symTable.remove(nestingLevel--);
 		decOffset = previosNl;
 		return null;
 	}
+
 	@Override
 	public Void visitNode(NewNode n) {
 		if (print) printNode(n);
@@ -451,6 +412,56 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			n.nestingLevel = nestingLevel; // nesting level dell'uso
 		}
 		return null;
+	}
+
+	//metodo usato in visitClassNode
+	private void updateDecOfField(ClassNode n, Map<String, STentry> virtualTable, int fieldOffset, List<TypeNode> allFields) {
+		for(FieldNode fieldNode : n.fieldList){
+			STentry fieldSt = new STentry(nestingLevel, fieldNode.getType(), fieldOffset--);
+			if (virtualTable.put(fieldNode.id, fieldSt)!= null){
+				System.out.println("Field id " + fieldNode.id + " at line "+ n.getLine() +" already declared");
+				stErrors++;
+			}
+			allFields.add(fieldNode.getType());
+		}
+	}
+
+	private void updateDecOfMethod(ClassNode n, Map<String, STentry> virtualTable, int methodOffset, List<ArrowTypeNode> allMethods, List<Map<String, STentry>> symTable) {
+		for(MethodNode methodNode : n.methodList){
+			List<TypeNode> paramMethodTypes = new ArrayList<>();
+			for(ParNode parNode : methodNode.parlist){
+				paramMethodTypes.add(parNode.getType());
+			}
+
+			MethodTypeNode methodType  = new MethodTypeNode(new ArrowTypeNode(paramMethodTypes,methodNode.retType));
+			STentry methodSt = new STentry(nestingLevel, methodType ,methodOffset++);
+			if (virtualTable.put(methodNode.id, methodSt) != null){
+				System.out.println("Method id " + methodNode.id + " at line "+ n.getLine() +" already declared");
+				stErrors++;
+			}
+			allMethods.add(new ArrowTypeNode(paramMethodTypes, methodNode.retType));
+			nestingLevel++;
+			Map<String, STentry> hashMapMethod = new HashMap<>();
+			symTable.add(hashMapMethod);
+			int previousNlMethod = decOffset;
+			decOffset = -2;
+			int parOffset = 1;
+			for (ParNode par : methodNode.parlist) {
+				STentry parEntry = new STentry(nestingLevel,par.getType(),parOffset++);
+				if (hashMapMethod.put(par.id, parEntry) != null) {
+					System.out.println("Par id " + par.id + " at line "+ n.getLine() +" already declared");
+					stErrors++;
+				}
+			}
+			//ora visito le dichiarazioni dei methodi
+			for (Node dec : methodNode.declist){
+				visit(dec);
+			}
+			//visito il corpo del metodo
+			visit(methodNode.exp);
+			symTable.remove(nestingLevel--);
+			decOffset=previousNlMethod;
+		}
 	}
 
 }
