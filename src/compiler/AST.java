@@ -92,6 +92,24 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	public static class TimesNode extends Node {
+		final Node left;
+		final Node right;
+		TimesNode(Node l, Node r) {left = l; right = r;}
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
+
+	public static class PlusNode extends Node {
+		final Node left;
+		final Node right;
+		PlusNode(Node l, Node r) {left = l; right = r;}
+
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
+
+	//////////////////////////// OPERATOR EXTENSION ////////////////////////////////////////////////////////////////////
 	public static class GreaterEqualNode extends Node {
 		final Node left;
 		final Node right;
@@ -136,29 +154,10 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-
-	
-	public static class TimesNode extends Node {
-		final Node left;
-		final Node right;
-		TimesNode(Node l, Node r) {left = l; right = r;}
-		@Override
-		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
-	}
-
 	public static class DivNode extends Node {
 		final Node left;
 		final Node right;
 		DivNode(Node l, Node r) {left = l; right = r;}
-		@Override
-		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
-	}
-
-	public static class PlusNode extends Node {
-		final Node left;
-		final Node right;
-		PlusNode(Node l, Node r) {left = l; right = r;}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
@@ -171,9 +170,8 @@ public class AST {
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//							OBJECT ORIENTED EXTENSION
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////// OBJECT ORIENTED EXTENSION /////////////////////////////////////////////////////////////
 
 	//x:A= new A() / new B() se B è sottotipo / new C() se C è sottotipo di B che è sottotipo di A
 	//nodo classe
@@ -260,6 +258,7 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	//////////////////////////// OBJECT ORIENTED TYPE EXTENSION ////////////////////////////////////////////////////////
 	/*
 	*	ClassTypeNode che ha come campi:
 	*		• ArrayList<TypeNode> allFields (tipi dei campi, inclusi quelli ereditati, in ordine di apparizione)
@@ -303,9 +302,7 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//									FINE ESTENSIONE OBJECT ORIENTED
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////// OBJECT ORIENTED EXTENSION DONE ////////////////////////////////////////////////////////
 
 	public static class CallNode extends Node {
 		final String id;

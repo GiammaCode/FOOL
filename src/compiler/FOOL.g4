@@ -116,7 +116,7 @@ CRPAR	: '}' ;
 SEMIC 	: ';' ;
 COLON   : ':' ;
 COMMA	: ',' ;
-DOT	    : '.' ;     //
+DOT	    : '.' ;  //
 OR	    : '||'; // ok
 AND	    : '&&'; // ok
 NOT	    : '!' ; // ok

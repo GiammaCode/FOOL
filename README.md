@@ -35,3 +35,48 @@ possono utilizzare, a seconda del livello di sviluppo del vostro progetto; in pa
 50000). Se per il vostro livello non vi sono files di prova includete un file ".fool" di prova del vostro progetto 
 nella directory principale dello zip.
 
+## File da consegnare
+In particolare la consegna del progetto consiste nell'invio dei seguenti 7 files del package "compiler", ottenuti
+estendendo i corrispondenti files nella directory "versione compilatore finale":
+---
+
+AST.java
+
+ASTGenerationSTVisitor.java
+
+SymbolTableASTVisitor.java
+
+PrintEASTVisitor.java
+
+TypeCheckEASTVisitor.java
+
+TypeRels.java
+
+CodeGenerationASTVisitor.java
+
+---
+
+Inoltre, solo qualora NON sia stata realizzata una estensione di FOOL che comprenda l'Object Orientation con
+ereditarietà, deve essere inviato anche il file FOOL.g4. Tale file deve essere ottenuto eliminando le parti del 
+linguaggio non realizzate dal FOOL.g4 fornitovi per il linguaggio completo FOOL ("Specifica lessicale e sintattica 
+del linguaggio FOOL" su Virtuale).
+
+Il compilatore realizzato deve quindi funzionare mettendo i 7 files sopra da consegnare (più eventualmente FOOL.g4)
+insieme agli altri files nella directory "versione compilatore finale" (files "STentry.java" e "Test.java" del package
+"compiler" e i files di tutti gli altri package), che quindi non dovete modificare.
+
+L'unica eccezione è il file "BaseASTVisitor.java": la versione di tale file da utilizzare per il linguaggio FOOL
+completo vi viene fornita ("BaseASTVisitor da usare per lo sviluppo del compilatore di FOOL" su Virtuale).
+Qualora realizziate una estensione parziale che non contenga tutti i Node della versione completa basta che commentiate 
+i relativi metodi di visita in tale file "BaseASTVisitor.java".
+
+Vi faccio inoltre presente che, nello sviluppo del progetto, il punto non sono tanto le questioni "stilistiche" 
+nella scrittura del codice/sua strutturazione. Il punto è, piuttosto, che abbiate capito i concetti relativi allo 
+sviluppo del compilatore spiegati a lezione (sue fasi e strutture dati con cui gestirle, ottenute estendendo quelle 
+fatte a lezione) ed è su quello che vi dovete concentrare e su cui verrete valutati. Ciò è l'aspetto rilevante dal 
+punto di vista didattico. La prova di progetto sarà quindi, prima di tutto, una prova orale sulla parte di compilatori 
+delle lezioni: tramite il vostro progetto mostretete inoltre di avere acquisito padronanza dei concetti spiegati e 
+di essere in grado di sviluppare autonomamente (a livello di gruppo) codice sulla base di questi. Per la valutazione 
+è quindi preferibile piuttosto consegnare un progetto svolto a un livello inferiore, ma che il codice che mi presentiate 
+risulti davvero frutto del vostro lavoro autonomo di gruppo.
+
