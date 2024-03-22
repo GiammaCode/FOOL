@@ -106,6 +106,51 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     }
 
     @Override
+    public String visitNode(CallNode n) {
+        if (print) printNode(n, n.id);
+        String argCode = null, getAR = null;
+        for (int i = n.arglist.size() - 1; i >= 0; i--) argCode = nlJoin(argCode, visit(n.arglist.get(i)));
+        for (int i = 0; i < n.nl - n.entry.nl; i++) getAR = nlJoin(getAR, "lw");
+        return nlJoin(
+                "lfp", // load Control Link (pointer to frame of function "id" caller)
+                argCode, // generate code for argument expressions in reversed order
+                "lfp", getAR, // retrieve address of frame containing "id" declaration
+                // by following the static chain (of Access Links)
+                "stm", // set $tm to popped value (with the aim of duplicating top of stack)
+                "ltm", // load Access Link (pointer to frame of function "id" declaration)
+                "ltm", // duplicate top of stack
+                "push " + n.entry.offset, "add", // compute address of "id" declaration
+                "lw", // load address of "id" function
+                "js"  // jump to popped address (saving address of subsequent instruction in $ra)
+        );
+    }
+
+    @Override
+    public String visitNode(IdNode n) {
+        if (print) printNode(n, n.id);
+        String getAR = null;
+        for (int i = 0; i < n.nl - n.entry.nl; i++) getAR = nlJoin(getAR, "lw");
+        return nlJoin(
+                "lfp", getAR, // retrieve address of frame containing "id" declaration
+                // by following the static chain (of Access Links)
+                "push " + n.entry.offset, "add", // compute address of "id" declaration
+                "lw" // load value of "id" variable
+        );
+    }
+
+    @Override
+    public String visitNode(BoolNode n) {
+        if (print) printNode(n, n.val.toString());
+        return "push " + (n.val ? 1 : 0);
+    }
+
+    @Override
+    public String visitNode(IntNode n) {
+        if (print) printNode(n, n.val.toString());
+        return "push " + n.val;
+    }
+
+    @Override
     public String visitNode(EqualNode n) {
         if (print) printNode(n);
         String l1 = freshLabel();
@@ -122,6 +167,27 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         );
     }
 
+    @Override
+    public String visitNode(TimesNode n) {
+        if (print) printNode(n);
+        return nlJoin(
+                visit(n.left),
+                visit(n.right),
+                "mult"
+        );
+    }
+
+    @Override
+    public String visitNode(MinusNode n) {
+        if (print) printNode(n);
+        return nlJoin(
+                visit(n.left),
+                visit(n.right),
+                "sub"
+        );
+    }
+
+    //////////////////////////// OPERATOR EXTENSION ////////////////////////////////////////////////////////////////////
     @Override
     public String visitNode(LessEqualNode n) {
         if (print) printNode(n);
@@ -209,16 +275,6 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     }
 
     @Override
-    public String visitNode(TimesNode n) {
-        if (print) printNode(n);
-        return nlJoin(
-                visit(n.left),
-                visit(n.right),
-                "mult"
-        );
-    }
-
-    @Override
     public String visitNode(DivNode n) {
         if (print) printNode(n);
         return nlJoin(
@@ -238,64 +294,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         );
     }
 
-    @Override
-    public String visitNode(MinusNode n) {
-        if (print) printNode(n);
-        return nlJoin(
-                visit(n.left),
-                visit(n.right),
-                "sub"
-        );
-    }
-
-    @Override
-    public String visitNode(CallNode n) {
-        if (print) printNode(n, n.id);
-        String argCode = null, getAR = null;
-        for (int i = n.arglist.size() - 1; i >= 0; i--) argCode = nlJoin(argCode, visit(n.arglist.get(i)));
-        for (int i = 0; i < n.nl - n.entry.nl; i++) getAR = nlJoin(getAR, "lw");
-        return nlJoin(
-                "lfp", // load Control Link (pointer to frame of function "id" caller)
-                argCode, // generate code for argument expressions in reversed order
-                "lfp", getAR, // retrieve address of frame containing "id" declaration
-                                // by following the static chain (of Access Links)
-                "stm", // set $tm to popped value (with the aim of duplicating top of stack)
-                "ltm", // load Access Link (pointer to frame of function "id" declaration)
-                "ltm", // duplicate top of stack
-                "push " + n.entry.offset, "add", // compute address of "id" declaration
-                "lw", // load address of "id" function
-                "js"  // jump to popped address (saving address of subsequent instruction in $ra)
-        );
-    }
-
-    @Override
-    public String visitNode(IdNode n) {
-        if (print) printNode(n, n.id);
-        String getAR = null;
-        for (int i = 0; i < n.nl - n.entry.nl; i++) getAR = nlJoin(getAR, "lw");
-        return nlJoin(
-                "lfp", getAR, // retrieve address of frame containing "id" declaration
-                // by following the static chain (of Access Links)
-                "push " + n.entry.offset, "add", // compute address of "id" declaration
-                "lw" // load value of "id" variable
-        );
-    }
-
-    @Override
-    public String visitNode(BoolNode n) {
-        if (print) printNode(n, n.val.toString());
-        return "push " + (n.val ? 1 : 0);
-    }
-
-    @Override
-    public String visitNode(IntNode n) {
-        if (print) printNode(n, n.val.toString());
-        return "push " + n.val;
-    }
-
-
-
-    //Implementazione Object Oriented
+    //////////////////////////// OBJECT ORIENTED EXTENSION /////////////////////////////////////////////////////////////
     @Override
     public String visitNode(ClassNode n) {
         if(print) printNode(n);
@@ -325,12 +324,8 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         );
     }
 
-
-
     //FieldNode come ParNode non utilizzato.
     //public String visitNode(FieldNode n) {}
-
-
 
     //simile a funNode ma con il campo label
     @Override
