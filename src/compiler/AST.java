@@ -3,10 +3,6 @@ package compiler;
 import java.util.*;
 import compiler.lib.*;
 
-/*
- *	accept()  accetta un qualunque baseASTVisitor dato che tutti gli ASTVisitor estendono il base
- *
- */
 public class AST {
 	
 	public static class ProgLetInNode extends Node {
@@ -92,6 +88,24 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	public static class TimesNode extends Node {
+		final Node left;
+		final Node right;
+		TimesNode(Node l, Node r) {left = l; right = r;}
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
+
+	public static class PlusNode extends Node {
+		final Node left;
+		final Node right;
+		PlusNode(Node l, Node r) {left = l; right = r;}
+
+		@Override
+		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
+	}
+
+	//////////////////////////// OPERATOR EXTENSION ////////////////////////////////////////////////////////////////////
 	public static class GreaterEqualNode extends Node {
 		final Node left;
 		final Node right;
@@ -136,29 +150,10 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-
-	
-	public static class TimesNode extends Node {
-		final Node left;
-		final Node right;
-		TimesNode(Node l, Node r) {left = l; right = r;}
-		@Override
-		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
-	}
-
 	public static class DivNode extends Node {
 		final Node left;
 		final Node right;
 		DivNode(Node l, Node r) {left = l; right = r;}
-		@Override
-		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
-	}
-
-	public static class PlusNode extends Node {
-		final Node left;
-		final Node right;
-		PlusNode(Node l, Node r) {left = l; right = r;}
-
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
@@ -171,9 +166,8 @@ public class AST {
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//							OBJECT ORIENTED EXTENSION
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////// OBJECT ORIENTED EXTENSION /////////////////////////////////////////////////////////////
 
 	//nodo classe
 	public static class ClassNode extends DecNode {
@@ -195,7 +189,7 @@ public class AST {
 		final String id;
 		FieldNode (String id, TypeNode t) {
 			this.id=id;
-			type=t;
+			this.type=t;
 		}
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
@@ -208,7 +202,6 @@ public class AST {
 		final List<ParNode> parlist;
 		final List<DecNode> declist;
 		final Node exp;
-
 		public String label; //label creata per la CodeGeneration
 
 		MethodNode(String i, TypeNode rt, List<ParNode> pl, List<DecNode> dl, Node e) {
@@ -225,7 +218,7 @@ public class AST {
 	//nodo chiamata di una classe, es: nameClass.setValue(x);
 	public static class ClassCallNode extends Node {
 		final RefTypeNode classID;
-		final List<Node> listNode;
+		final List<Node> argumentList;
 		final String methodID;
 		STentry stEntry;
 		STentry methodStentry;
@@ -233,7 +226,7 @@ public class AST {
 		ClassCallNode (RefTypeNode classID, String methodID, List<Node> listNode) {
 			this.classID=classID;
 			this.methodID=methodID;
-			this.listNode=listNode;
+			this.argumentList =listNode;
 		}
 		@Override
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
@@ -243,7 +236,7 @@ public class AST {
 	public static class NewNode extends Node {
 		final List<Node> argList;
 		final String id;
-		STentry stentry;
+		STentry stEntry;
 		NewNode (List<Node> argList, String id) {
 			this.argList=argList;
 			this.id=id;
@@ -259,6 +252,7 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+	//////////////////////////// OBJECT ORIENTED TYPE EXTENSION ////////////////////////////////////////////////////////
 	/*
 	*	ClassTypeNode che ha come campi:
 	*		• ArrayList<TypeNode> allFields (tipi dei campi, inclusi quelli ereditati, in ordine di apparizione)
@@ -290,6 +284,8 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
+
+
 	public static class RefTypeNode extends TypeNode {
 		final String id;
 		RefTypeNode (String id) {   //da rivedere
@@ -305,9 +301,7 @@ public class AST {
 		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//									FINE ESTENSIONE OBJECT ORIENTED
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////// OBJECT ORIENTED EXTENSION DONE ////////////////////////////////////////////////////////
 
 	public static class CallNode extends Node {
 		final String id;

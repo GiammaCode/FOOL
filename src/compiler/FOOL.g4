@@ -25,7 +25,7 @@ progbody : LET ( cldec+ dec* | dec+ ) IN exp SEMIC #letInProg
          | exp SEMIC                               #noDecProg
          ;
 
-cldec  : CLASS ID (EXTENDS ID)?
+cldec  : CLASS ID
               LPAR (ID COLON type (COMMA ID COLON type)* )? RPAR
               CLPAR
                    methdec*
@@ -106,9 +106,9 @@ type    : INT #intType
  *------------------------------------------------------------------*/
 
 PLUS  	: '+' ;
-MINUS   : '-' ; // ok
+MINUS   : '-' ;     // ok
 TIMES   : '*' ;
-DIV 	: '/' ; // ok
+DIV 	: '/' ;     // ok
 LPAR	: '(' ;
 RPAR	: ')' ;
 CLPAR	: '{' ;
@@ -116,12 +116,12 @@ CRPAR	: '}' ;
 SEMIC 	: ';' ;
 COLON   : ':' ;
 COMMA	: ',' ;
-DOT	    : '.' ;     //
-OR	    : '||'; // ok
-AND	    : '&&'; // ok
-NOT	    : '!' ; // ok
-GE	    : '>=' ; // ok
-LE	    : '<=' ; // ok
+DOT	    : '.' ;     // ok
+OR	    : '||';     // ok
+AND	    : '&&';     // ok
+NOT	    : '!' ;     // ok
+GE	    : '>=' ;    // ok
+LE	    : '<=' ;    // ok
 EQ	    : '==' ;
 ASS	    : '=' ;
 TRUE	: 'true' ;
@@ -134,10 +134,9 @@ LET     : 'let' ;
 IN      : 'in' ;
 VAR     : 'var' ;
 FUN	    : 'fun' ;
-CLASS	: 'class' ;     //
-EXTENDS : 'extends' ;   //
-NEW 	: 'new' ;       //
-NULL    : 'null' ;      //
+CLASS	: 'class' ;     // ok
+NEW 	: 'new' ;       // ok
+NULL    : 'null' ;      // ok
 INT	    : 'int' ;
 BOOL	: 'bool' ;
 NUM     : '0' | ('1'..'9')('0'..'9')* ;

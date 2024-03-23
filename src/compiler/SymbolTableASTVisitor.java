@@ -1,9 +1,7 @@
 package compiler;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
-import com.sun.jdi.ClassType;
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
@@ -159,84 +157,6 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	}
 
 	@Override
-	public Void visitNode(EqualNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(GreaterEqualNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(LessEqualNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-	@Override
-	public Void visitNode(TimesNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(DivNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(PlusNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(MinusNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(NotNode n) {
-		if (print) printNode(n);
-		visit(n.exp);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(AndNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
-	public Void visitNode(OrNode n) {
-		if (print) printNode(n);
-		visit(n.left);
-		visit(n.right);
-		return null;
-	}
-
-	@Override
 	public Void visitNode(CallNode n) {
 		if (print) printNode(n);
 		STentry entry = stLookup(n.id);
@@ -277,121 +197,160 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		return null;
 	}
 
-	// Implementazione Object Oriented
+	@Override
+	public Void visitNode(EqualNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
 
 	@Override
-	public Void visitNode(ClassNode n){
+	public Void visitNode(TimesNode n) {
 		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
 
-		// prendo symtable al livello attuale come per la VarNode.
+	@Override
+	public Void visitNode(MinusNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	//////////////////////////// OPERATOR EXTENSION ////////////////////////////////////////////////////////////////////
+	@Override
+	public Void visitNode(GreaterEqualNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(LessEqualNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(DivNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(PlusNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(NotNode n) {
+		if (print) printNode(n);
+		visit(n.exp);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(AndNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	@Override
+	public Void visitNode(OrNode n) {
+		if (print) printNode(n);
+		visit(n.left);
+		visit(n.right);
+		return null;
+	}
+
+	//////////////////////////// OBJECT ORIENTED EXTENSION /////////////////////////////////////////////////////////////
+	@Override
+	public Void visitNode(ClassNode n) {
+		if (print) printNode(n);
+		/*Nella SIMBTABLE di livello 0 viene aggiunto il nome della classe
+		mappato ad una nuova STentry, cosa mettiamo nella StEntry?
+		Offset = -2 e incrementato, il tipo , nl=0
+		Se non eredito il tipo è un nuovo oggetto ClassTypeNode con lista vuota
+		(Field e metodi liste).
+		La gestisco come in VarNode, il type non c'è l'ho e lo creo
+		*/
 		Map<String, STentry> hm = symTable.get(nestingLevel);
 		List<TypeNode> allFields = new ArrayList<>();
 		List<ArrowTypeNode> allMethods = new ArrayList<>();
-
-		// creo la pallina. Gestisco la dichiarazione di classe: quindi metto il nesting level e creo il classtypenode
-		// (tipo funzionale) della classe (allFields, allMethods). I tipi dei campi finisco in due posti: qua nella dichiaraizone
-		// del tipo della classe e nella dichiarazione proprio dei campi stessi di cui dichiariamo anche il tipo.
-		STentry entry = new STentry(nestingLevel, new ClassTypeNode(allFields, allMethods), decOffset--);
-
-
-		//aggiungo nuova mappa. Virtual table della Class Table.
-		Map<String, STentry> hmn = new HashMap<>();
-		// metto nella class table il nome della classe dichiarata e poi la virtual table che andrò a riempire
-		classTable.put(n.id, hmn);
-
-		// inserimento di ID nella symtable. RICORDA CHE IL NOME DELLA classe E QUINDI LA classe, VIENE INSERITA
-		// NELLO SCOPE ESTERNO NON IN QUELLO INTERNO, QUINDI METTO L'ID NELLO SCOPE ESTERNO E POI NE CREO UN ALTRO
-		// DOVE AVVERRÀ IL RESTO DELLA ROBA.
-		if (hm.put(n.id, entry) != null) {
-			System.out.println("Class id " + n.id + " at line "+ n.getLine() +" already declared");
+		ClassTypeNode typeNode = new ClassTypeNode(allFields, allMethods);
+		STentry entry = new STentry(nestingLevel, typeNode,decOffset--);
+		/*
+		Nella CLASS TABLE, invece viene aggiunto il nome della classe associato
+		ad una nuova VIRTUAL TABLE, che funziona come prima (SymTable).
+		Se non eredito la creo vuota.
+		* */
+		Map<String, STentry> virtualTable = new HashMap<>();
+		classTable.put(n.id, virtualTable);
+		if (hm.put(n.id, entry) != null){
+			System.out.println("Par id " + n.id + " at line "+ n.getLine() +" already declared");
 			stErrors++;
 		}
-
-		// creare una nuova hashmap per la symTable. entro in un nuovo scope
+		/*
+		Mentre netriamo nella dichiarazione della classe, creo un nuovo livello
+		per la symTable ma non vuoto, GLI METTO LA VIRTUAL TABLE di prima.
+		* */
 		nestingLevel++;
-		symTable.add(hmn);
-
-		//entro in un nuovo scope, creo un nuovo AR e quindi devo ripartire da -2, salvandomi l'offset da cui son partito.
-		int prevNLDecOffset=decOffset; // stores counter for offset of declarations at previous nesting level
-		// dato che entriamo in un nuovo scope dobbiamo re-inizializzare l'offset globale.
-		decOffset=-2;
-
-		int fieldOffset=-1;
-
-		// riempiamo le liste totali da aggiungere alla STEntry del livello globale, quindi da aggiungere alla ClassTypeNode
-		// prendiamo i campi e li salviamo
-		for (FieldNode field : n.fieldList){
-			/*
-			 * Notare che non facciamo la visitFieldNode perchè è da fare qua! E' implicita nella visita della dichiarazione di classe.
-			 * In pratica il pezzo di codice qui sotto è la visitFieldNode.
-			 *
-			 * fieldOffset è il contatore dell'offset dei campi
-			 */
-			if (hmn.put(field.id, new STentry(nestingLevel, field.getType(), fieldOffset--)) != null) {
-				System.out.println("Field id " + field.id + " at line "+ n.getLine() +" already declared");
-				stErrors++;
-			}
-
-			// allFields per la STEntry del livello globale. In allFields si setta la posizione del campo a -offset-1. Ad
-			// esempio: il primo campo avrà offset -1 quindi in allFields sarà in posizione 0 (-offset-1 = -(-1) -1 = +1 -1 = 0)
-			allFields.add(field.getType());
-		}
-
+		symTable.add(virtualTable);
+		//mi preparo per entrare in un nuovo scope.
+		int previosNl = decOffset;
+		decOffset = -2;
+		int fieldOffset =-1;
 		int methodOffset=0;
+		/*Una volta entrato nella dichiarazione della classe:
+		aggiorno Virtual Table e Class Type Node tutte le volte che si
+		incontrano.
+		--> dichiarazione di campo (NO visit FieldNode)
+		--> dichiarazione di metodo (visit MethodNode)
+		n.MethodNode è la methodList
 
+		COME FACCIO AD AGGIORNARE LA VIRTUAL TABLE una volta entrato nella dichiarazione
+		della classe?
+		Come fatto a lezione, a parte che (metodo brutto ma funzionante)
 
+		1) se trovo nome campo o metodo gia presente non lo considero come errore
+		ma come overriding, sostituisco con la nuova stEnty ma con il vecchio
+		offset.
+		Devo sostituire nella stessa posizione praticamente.
+		Non devo consentire però l'overriding Field --> Method e viceversa.
 
-		// prendiamo i metodi e per ognuno di questi prendiamo i tipi parametri ed il tipo di ritorno e per ognuno di questi
-		// ci facciamo un arrowtypenode (che in pratica sono tante dichiarazioni di funzioni quindi bisogna fare come
-		// in fundec). Un volta creato questo arrowtypenode lo aggiungiamo alla lista di arrowtyopenode.
-		for (MethodNode methodNode : n.methodList) {
+		2) se campo o metodo rimane invariato, uso contatore offset e decremento
+		e incremento.
 
-			List<TypeNode> paramMethodTypes = new ArrayList<>();
-			for (ParNode param : methodNode.parlist) paramMethodTypes.add(param.getType());
+		COME FACCIO AD AGGIORNARE CLASS TYPE NODE ?
+		viene fatto nel codice della visita di classNode e
+		- per i campu aggionrno array allFields settando -offset-1 al tipo
+		converto l'offset in una posizione.
+		- per i metodi aggiorno allMethod settando offset (il primo è 0)
+		* */
+		updateDecOfField(n, virtualTable, fieldOffset, allFields);
+		updateDecOfMethod(n, virtualTable, methodOffset, allMethods, symTable);
 
-			if (hmn.put(methodNode.id, new STentry(nestingLevel, new MethodTypeNode(new ArrowTypeNode(paramMethodTypes,
-					methodNode.retType)), methodOffset++)) != null) {
-				System.out.println("Method id " + methodNode.id + " at line "+ n.getLine() +" already declared");
-				stErrors++;
-			}
-
-			allMethods.add(new ArrowTypeNode(paramMethodTypes, methodNode.retType));
-
-			nestingLevel++;
-			Map<String, STentry> hmd = new HashMap<>();
-			symTable.add(hmd);
-			int prevNLDecOffsetMethod=decOffset; // stores counter for offset of declarations at previous nesting level
-			decOffset=-2;
-
-			int parOffset=1;
-			for (ParNode par : methodNode.parlist) {
-				STentry parEntry = new STentry(nestingLevel,par.getType(),parOffset++);
-				if (hmd.put(par.id, parEntry) != null) {
-					System.out.println("Par id " + par.id + " at line "+ n.getLine() +" already declared");
-					stErrors++;
-				}
-
-			}
-
-			// visito le dichiarazione all'interno del metodo. Quando visito queste dichiarazioni posso incontrare
-			// anche dei funNode.
-			for (Node dec : methodNode.declist) {
-				visit(dec); // qui ripartono da -2 gli offset
-			}
-
-			// visito il corpo del metodo
-			visit(methodNode.exp);
-
-			symTable.remove(nestingLevel--);
-			decOffset=prevNLDecOffsetMethod; // restores counter for offset of declarations at previous nesting level
-
-		}
-
-		//ho visitato tutto il corpo e allora rimuovo la hashmap corrente poiche' esco dallo scope.
+		/*All'uscita della dichirazione della classe rimuovo il livello corrente
+		della SymTable.*/
 		symTable.remove(nestingLevel--);
-		decOffset=prevNLDecOffset; // restores counter for offset of declarations at previous nesting level . Ripristino l'offset in cui ero.
+		decOffset = previosNl;
 		return null;
 	}
+
 	@Override
 	public Void visitNode(NewNode n) {
 		if (print) printNode(n);
@@ -401,7 +360,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			ID deve essere in Class Table e STentry presa
 	 		direttamente da livello 0 della Symbol Table
 			**/
-			n.stentry = this.symTable.get(0).get(n.id);
+			n.stEntry = this.symTable.get(0).get(n.id);
 		}
 		else{
 			System.out.println("Class id" + n.id + " at line "+ n.getLine() +" not declared");
@@ -432,7 +391,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	public Void visitNode(ClassCallNode n) {
 		if (print) printNode(n);
 
-		//cerco la dichirazione della classe in quel livello o in quelli superiori
+		//cerco la dichirazione della classe in quel livello o in quelli superiori, entryClass non è mai null
 		STentry entryClass = stLookup(n.classID.id);
 		//cerco la dichiarazione metodo nella virtual table
 		Map<String, STentry> virtualTable = classTable.get(((RefTypeNode)entryClass.type).id);
@@ -442,11 +401,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		// Come facciamo a risalire all'ID della classe? potremmo aggiugnere un campo a reftypenode?
 		STentry entryMethod = virtualTable.get(n.methodID);
 
-
-		if (entryClass == null){
-			System.out.println("Instance of Class " + n.classID + " at line "+ n.getLine() + " not declared");
-			stErrors++;
-		} else if (entryMethod == null) {
+		if (entryMethod == null) {
 			System.out.println("Method "+ n.methodID + " of Class " + n.classID + " at line "+ n.getLine() + " not declared");
 			stErrors++;
 		}
@@ -457,6 +412,56 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			n.nestingLevel = nestingLevel; // nesting level dell'uso
 		}
 		return null;
+	}
+
+	//metodo usato in visitClassNode
+	private void updateDecOfField(ClassNode n, Map<String, STentry> virtualTable, int fieldOffset, List<TypeNode> allFields) {
+		for(FieldNode fieldNode : n.fieldList){
+			STentry fieldSt = new STentry(nestingLevel, fieldNode.getType(), fieldOffset--);
+			if (virtualTable.put(fieldNode.id, fieldSt)!= null){
+				System.out.println("Field id " + fieldNode.id + " at line "+ n.getLine() +" already declared");
+				stErrors++;
+			}
+			allFields.add(fieldNode.getType());
+		}
+	}
+
+	private void updateDecOfMethod(ClassNode n, Map<String, STentry> virtualTable, int methodOffset, List<ArrowTypeNode> allMethods, List<Map<String, STentry>> symTable) {
+		for(MethodNode methodNode : n.methodList){
+			List<TypeNode> paramMethodTypes = new ArrayList<>();
+			for(ParNode parNode : methodNode.parlist){
+				paramMethodTypes.add(parNode.getType());
+			}
+
+			MethodTypeNode methodType  = new MethodTypeNode(new ArrowTypeNode(paramMethodTypes,methodNode.retType));
+			STentry methodSt = new STentry(nestingLevel, methodType ,methodOffset++);
+			if (virtualTable.put(methodNode.id, methodSt) != null){
+				System.out.println("Method id " + methodNode.id + " at line "+ n.getLine() +" already declared");
+				stErrors++;
+			}
+			allMethods.add(new ArrowTypeNode(paramMethodTypes, methodNode.retType));
+			nestingLevel++;
+			Map<String, STentry> hashMapMethod = new HashMap<>();
+			symTable.add(hashMapMethod);
+			int previousNlMethod = decOffset;
+			decOffset = -2;
+			int parOffset = 1;
+			for (ParNode par : methodNode.parlist) {
+				STentry parEntry = new STentry(nestingLevel,par.getType(),parOffset++);
+				if (hashMapMethod.put(par.id, parEntry) != null) {
+					System.out.println("Par id " + par.id + " at line "+ n.getLine() +" already declared");
+					stErrors++;
+				}
+			}
+			//ora visito le dichiarazioni dei methodi
+			for (Node dec : methodNode.declist){
+				visit(dec);
+			}
+			//visito il corpo del metodo
+			visit(methodNode.exp);
+			symTable.remove(nestingLevel--);
+			decOffset=previousNlMethod;
+		}
 	}
 
 }
