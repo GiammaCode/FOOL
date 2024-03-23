@@ -217,8 +217,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return new IntTypeNode();
 	}
 
-// gestione tipi incompleti	(se lo sono lancia eccezione)
-	
+	// gestione tipi incompleti	(se lo sono lancia eccezione)
 	@Override
 	public TypeNode visitNode(ArrowTypeNode n) throws TypeException {
 		if (print) printNode(n);
@@ -239,14 +238,14 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return null;
 	}
 
-// STentry (ritorna campo type)
-
+	// STentry (ritorna campo type)
 	@Override
 	public TypeNode visitSTentry(STentry entry) throws TypeException {
 		if (print) printSTentry("type");
 		return ckvisit(entry.type); 
 	}
 
+	//		OBJECT ORIENTED IMPLEMENTATION
 	@Override
 	public TypeNode visitNode(ClassTypeNode n) {
 		if (print) printNode(n);
@@ -254,13 +253,13 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	}
 
 	@Override
-	public TypeNode visitNode(RefTypeNode n) {
+	public TypeNode visitNode(MethodTypeNode n) {
 		if (print) printNode(n);
 		return null;
 	}
 
 	@Override
-	public TypeNode visitNode(MethodTypeNode n) {
+	public TypeNode visitNode(RefTypeNode n) {
 		if (print) printNode(n);
 		return null;
 	}

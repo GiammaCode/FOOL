@@ -265,17 +265,18 @@ public class AST {
 	*		• ArrayList<ArrowTypeNode> allMethods (tipi funzionali metodi, inclusi ereditati, in ordine apparizione)
 	*/
 	public static class ClassTypeNode extends TypeNode {
-
-
-		final ArrayList<TypeNode> allFields;
-		final ArrayList<ArrowTypeNode> allMethods;
-		ClassTypeNode (ArrayList<TypeNode> allFields, ArrayList<ArrowTypeNode> allMethods) {
-			this.allFields = allFields;
-			this.allMethods = allMethods;
+			final List<TypeNode> allFields;
+			final List<ArrowTypeNode> allMethods;
+			ClassTypeNode(List < TypeNode > allFields, List < ArrowTypeNode > allMethods) {
+				this.allFields = allFields;
+				this.allMethods = allMethods;
+			}
+			@Override
+			public <S, E extends Exception > S accept(BaseASTVisitor < S, E > visitor) throws E {
+				return visitor.visitNode(this);
+			}
 		}
-		@Override
-		public <S,E extends Exception> S accept(BaseASTVisitor<S,E> visitor) throws E {return visitor.visitNode(this);}
-	}
+
 	/*
 	*	MethodTypeNode ha come campo il tipo funzionale:
 	*			• final ArrowTypeNode fun
