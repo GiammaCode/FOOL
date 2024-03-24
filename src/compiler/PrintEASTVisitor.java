@@ -4,6 +4,23 @@ import compiler.AST.*;
 import compiler.lib.*;
 import compiler.exc.*;
 
+
+/*
+ * Effettua la visita con il metodo "visitNode" per ciascuna classe AST.java, che riceva un
+ * oggetto di tale classe come argomento.
+ *
+ * Usiamo la reflection di Java per fare le stampe, in modo da facilitare l'estendibilità del linguaggio.
+ * Ora in BaseASTVisitor
+ * avremo due tipi di stampa una che stampa solo il nodo e uno che stampa nodo e stringa per le foglie.
+ *
+ *
+ * Prima avevamo creato il printASTVisiotr ora lo estendiamo per stampare l"EAST quindi un AST arricchito. Ragionamento
+ * analogo a prima. Facciamo una semplice visita dell'Enriched AST generato in modo da visualizzarlo stampando in modo
+ * indentato, oltre ai suoi nodi (di classe che eredita da Node), anche le sue STentry. Per farlo dovremo realizzare un
+ *  visitor che consenta di visitare sia Node che STentry tramite una interfaccia Visitable (contenente il metodo "accept")
+ * implementata da entrambi.
+ *
+ */
 public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	/*
 	* Facciamo un semplice visita del EAST generato in modo da visualizzarlo

@@ -1,56 +1,32 @@
 push 0
-lhp
-push function0
-lhp
-sw
-lhp
-push 1
-add
-shp
 push 5
-lhp
-sw
-lhp
+push 3
+sub
+push 7
+push 5
+mult
 push 1
-add
-shp
-push 9998
-lw
-lhp
-sw
-lhp
-lhp
-push 1
-add
-shp
-lfp
 lfp
 push -3
 add
 lw
-stm
-ltm
-ltm
-lw
-push 0
+lfp
+push -2
 add
 lw
-js
+beq label2
+push 0
+b label3
+label2:
+push 1
+label3:
+sub
+push 1
+beq label0
+push 0
+b label1
+label0:
+push 1
+label1:
 print
 halt
-
-function0:
-cfp
-lra
-lfp
-lw
-push -1
-add
-lw
-stm
-sra
-pop
-sfp
-ltm
-lra
-js

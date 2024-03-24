@@ -10,6 +10,18 @@ import compiler.FOOLParser.*;
 import compiler.lib.*;
 import static compiler.lib.FOOLlib.*;
 
+/*
+ * Visito l'ST per generare l'AST.
+ *
+ * Nei linguaggi funzionali tutto è un espressione (if-then-else funzionale in Java è quello con il ? e torna qualcosa, il
+ * if-then-else non funzionale in Java è il classico con gli statement). Qua tutto è un espressione quindi, ad esempio,
+ * negli if-then-else torna sempre il valore di then o else.
+ *
+ * Gestiamo i Syntax Tree incompleti tornando null quando si effettua una qualsiasi visit con argomento null
+ * nell'ASTGenerationSTVisitor
+ *
+ * Il FOOLBaseVisitor è da dove prento ST il syntax Tree da estendere in AST
+ */
 public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 
 	String indent;

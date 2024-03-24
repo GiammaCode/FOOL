@@ -1,7 +1,10 @@
 let
-      class Banca (money:int) {
-        fun getMon:int () money;
-      }
-      var myclass:Banca = new Banca(5);
-
-in print(myclass.getMon());
+  var x:int = 5-3;
+  var y:int = 7*5;
+in
+  print (
+   if (!(y == x))
+     then { true }
+     else { false }
+  )
+;
