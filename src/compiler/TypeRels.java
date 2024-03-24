@@ -7,37 +7,34 @@ public class TypeRels {
 
 	// valuta se il tipo "a" e' <= al tipo "b", dove "a" e "b" sono tipi di base: IntTypeNode o BoolTypeNode
 	public static boolean isSubtype(TypeNode a, TypeNode b) {
-
 		// controlliamo che se a è una classe allora anche b lo dovrebbe essere sennò torno false
-		if ( a instanceof RefTypeNode )  {
-			if (b instanceof RefTypeNode){
+		if ( isRefType(a) )  {
+			if (isRefType(b)){
 				return ((RefTypeNode) a).id.equals(((RefTypeNode) b).id);
 			} else {
 				return false;
 			}
 		}
-
 		// se a è emptyTypeNode allora b deve essere sovraclasse ovvero RefTypeNode o EmptyTypeNode
 		if (a instanceof EmptyTypeNode) {
-			return ( (b instanceof EmptyTypeNode) || (b instanceof RefTypeNode) );
+			return ( isEmptyType(b) || isRefType(b) );
 		}
 
-		if ( (a instanceof IntTypeNode) || (a instanceof BoolTypeNode) ) {
-			return a.getClass().equals(b.getClass()) || // caso in cui a e b sono dello stesso tipo
-					((a instanceof BoolTypeNode) && (b instanceof IntTypeNode));
+		if ( isInteger(a)|| isBoolean(a) ) {
+			// caso in cui a e b sono dello stesso tipo
+			return a.getClass().equals(b.getClass()) || (isBoolean(a)) && isInteger(b);
 		}
-
 		System.out.println("Type error");
 		return false;
 	}
 
-	public static boolean isBoolean(TypeNode e) {
-		return e.getClass().equals(BoolTypeNode.class);
-	}
+	public static boolean isBoolean(TypeNode e) {return e instanceof BoolTypeNode;}
 
-	public static boolean isInteger(TypeNode e) {
-		return e.getClass().equals(IntTypeNode.class);
-	}
+	public static boolean isInteger(TypeNode e) {return e instanceof IntTypeNode;}
+
+	private static boolean isRefType(TypeNode e) {return e instanceof RefTypeNode;}
+
+	private static boolean isEmptyType(TypeNode e) {return e instanceof EmptyTypeNode;}
 
 
 }

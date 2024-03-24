@@ -40,19 +40,19 @@ In particolare la consegna del progetto consiste nell'invio dei seguenti 7 files
 estendendo i corrispondenti files nella directory "versione compilatore finale":
 ---
 
-AST.java
+AST.java                            ok
 
-ASTGenerationSTVisitor.java
+ASTGenerationSTVisitor.java         ok
 
-SymbolTableASTVisitor.java
+SymbolTableASTVisitor.java          ok
 
-PrintEASTVisitor.java
+PrintEASTVisitor.java               ok
 
-TypeCheckEASTVisitor.java
+TypeCheckEASTVisitor.java           ok
 
-TypeRels.java
+TypeRels.java                       ok
 
-CodeGenerationASTVisitor.java
+CodeGenerationASTVisitor.java       ok
 
 ---
 
