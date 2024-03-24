@@ -213,6 +213,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(ClassNode n) {
 		printNode(n, "Class id: " + n.id);
+		//visito tutti i campi e i metodi della classe
 		for (Node field : n.fieldList) visit(field);
 		for (Node method : n.methodList) visit(method);
 		return null;
@@ -229,6 +230,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 		//uguale a funNode
 		printNode(n, "Method id: " + n.id);
 		visit(n.retType);
+		//visito parametri e dichiarazioni del metodo
 		for (ParNode par : n.parlist) visit(par);
 		for (DecNode dec : n.declist) visit(dec);
 		visit(n.exp);
@@ -238,9 +240,9 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void,VoidException> {
 	@Override
 	public Void visitNode(ClassCallNode n) {
 		printNode(n, "Class id: " + n.classID.id + " Method id " + n.methodID +  " at nesting level: " + n.nestingLevel  );
-		visit(n.classID); //stampo il tipo della classe
-		visit(n.stEntry); //printo la entry della dichirazione della classe
-		visit(n.methodStentry); //printo la entry della dichirazione del metodo
+		visit(n.classID);
+		visit(n.stEntry); //visitiamo la entry della dichirazione della classe
+		visit(n.methodStentry); //visitiamo la entry della dichirazione del metodo
 		for(Node node : n.argumentList) visit(node);
 		return null;
 	}

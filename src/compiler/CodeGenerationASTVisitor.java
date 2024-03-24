@@ -216,8 +216,8 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         return nlJoin(
                 visit(n.left),
                 visit(n.right),
-                "bleq " + l1,
-                "push 0",
+                "bleq " + l1,   // se l'ultimo operando sullo stack è <= del penultimo vado a l1 e push 1
+                "push 0",       //senò push 0
                 "b " + l2,
                 l1 + ":",
                 "push 1",
@@ -385,7 +385,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
     //assomiglia alla chiamata di metodo di una funzione, deve costruire l'AR del metodo invocato
     //cambia il modo incui setto l'acces link perchè deve puntare allo scope che lo racchiude(object pointer)
     //che trovo grazie a id1 che trovo sommando l'offset e risalendo la catena statica
-    //recupero i op e lo uso per settare l'access link
+    //recupero l'op e lo uso per settare l'access link
     //lo uso anche per raggiungere la dispach table usando l'offset di id2
     //per poi saltarci
     @Override

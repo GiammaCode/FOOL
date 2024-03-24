@@ -296,7 +296,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		}
 
 		// itero sul figlio dec della funzione e scopro tutte le dichiarazione dei figli (var o funzione).
-		// infatti, dalla sua produzione, si capisce che posso averne 0, 1 o più di dichiarazione, quindi itero.
+		// infatti, dalla sua produzione, si capisce che posso averne 0, 1 o più dichiarazione, quindi itero.
 		List<DecNode> decList = new ArrayList<>();
 		for (DecContext dec : c.dec()) decList.add((DecNode) visit(dec));
 
@@ -312,7 +312,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
 		return n;
 	}
 
-	// Indica la classe (Account, Cane, ecc)
+	// Indica la classe (Account, casa ,ecc..)
 	@Override
 	public Node visitIdType(IdTypeContext c) {
 		if (print) printVarAndProdName(c);
